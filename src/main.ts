@@ -10,7 +10,7 @@ import {Ray} from '@babylonjs/core/Culling/ray';
 import {TransformNode} from '@babylonjs/core/Meshes/transformNode';
 import {Mesh} from '@babylonjs/core/Meshes/mesh';
 import {createWorld,type Door} from './world';
-import {blocked,groundHeight,destinations,rooms,STOREY,SITE_SIDE} from './plan';
+import {blocked,groundHeight,destinations,rooms,STOREY,SITE_SIDE,ARCH,LEVEL,inside} from './plan';
 import {floorPlanSvg,sitePlanSvg} from './diagrams';
 import './style.css';
 
@@ -18,7 +18,7 @@ const app=document.querySelector<HTMLDivElement>('#app')!;
 app.innerHTML=`
 <canvas id="view" aria-label="Interactive 3D mansion walkthrough" tabindex="0"></canvas>
 <div class="loading" id="loading"><div><div class="eyebrow">OSCAR’S PRIVATE ESTATE</div><h2>Dreamhome.</h2><p>PREPARING YOUR ARRIVAL</p></div></div>
-<header class="top"><div class="brand"><div class="monogram">D.</div><div><strong>DREAMHOME</strong><small>A contemporary courtyard estate</small></div></div><nav class="toolbar" aria-label="View controls"><button class="button" id="time">☀ Daylight</button><button class="button" id="camera">First person</button><button class="button" id="map">Estate map</button><select id="quality" aria-label="Graphics quality"><option value="balanced">Balanced</option><option value="low">Performance</option><option value="high">High quality</option></select><select id="designView" aria-label="Architectural views"><option value="walk">Walkthrough</option><option value="arrival">Entrance view</option><option value="rear">Garden view</option><option value="court">Courtyard view</option><option value="aerial">Aerial view</option></select><button class="button" id="help">?</button></nav></header>
+<header class="top"><div class="brand"><div class="monogram">D.</div><div><strong>DREAMHOME</strong><small>A contemporary courtyard estate</small></div></div><nav class="toolbar" aria-label="View controls"><button class="button" id="time">☀ Daylight</button><button class="button" id="camera">First person</button><button class="button" id="map">Estate map</button><select id="quality" aria-label="Graphics quality"><option value="balanced">Balanced</option><option value="low">Performance</option><option value="high">High quality</option></select><select id="designView" aria-label="Architectural views"><option value="walk">Walkthrough</option><option value="arrival">Entrance view</option><option value="rear">Garden view</option><option value="court">Courtyard view</option><option value="courtSky">Courtyard overlook</option><option value="social">Social spaces</option><option value="foyer">Foyer view</option><option value="overlook">Living overlook</option><option value="stair">Upper stair arrival</option><option value="stairLower">Intermediate landing</option><option value="stairRoof">Roof stair arrival</option><option value="roof">Rooftop terrace</option><option value="aerial">Aerial view</option></select><button class="button" id="help">?</button></nav></header>
 <section class="intro" id="intro"><div class="eyebrow">ONE ACRE · SIX PRIVATE SUITES</div><h1>Room to breathe.<br>Space to belong.</h1><p>A quiet courtyard at the heart of a contemporary home. Explore two floors, a rooftop retreat, and gardens designed around life outdoors.</p><div class="specs"><div><b>06</b><span>Ensuite bedrooms</span></div><div><b>02</b><span>Residential floors</span></div><div><b>01</b><span>Acre of possibility</span></div></div><div class="actions"><button class="button primary" id="enter">Enter the estate ↗</button><button class="button" id="explore">Explore the plan</button></div><p class="subnote">Interactive architectural concept · dimensions and layout are editable</p></section>
 <div id="crosshair" class="crosshair hidden"></div><div id="prompt" class="prompt hidden"></div>
 <aside class="map-panel hidden" id="mapPanel"><div class="eyebrow">YOUR PLACE IN THE ESTATE</div><h2>Take a look around.</h2><div class="plan-tabs"><button class="button" data-plan="site">Site</button><button class="button" data-plan="0">Ground</button><button class="button" data-plan="1">Upper</button></div><div id="planDiagram">${sitePlanSvg()}</div><div id="destinations"></div><p>Concept plot: ${SITE_SIDE.toFixed(2)} × ${SITE_SIDE.toFixed(2)} m. Rear garden is at the top; compass orientation is unconfirmed. Use these shortcuts or walk through the estate.</p></aside>
@@ -33,9 +33,9 @@ function start(){
 const engine=new Engine(canvas,true,{stencil:true,preserveDrawingBuffer:false,powerPreference:'high-performance'});
 const scene=new Scene(engine);scene.skipPointerMovePicking=true;
 const world=createWorld(scene);
-const camera=new UniversalCamera('Walkthrough',new Vector3(0,1.7,-22),scene);camera.minZ=.07;camera.maxZ=180;camera.fov=1.05;camera.inputs.clear();
-const overview=new ArcRotateCamera('Estate overview',-Math.PI*.7,Math.PI*.31,83,new Vector3(0,1,4),scene);overview.minZ=.2;overview.maxZ=250;scene.activeCamera=overview;
-const player=new Vector3(7.2,0,-23);let designView=false;let yaw=0,pitch=0,third=false,started=false,night=false,keys=new Set<string>(),quality='balanced',toastTimer=0,drag=false,lastX=0,lastY=0,elapsed=0;
+const camera=new UniversalCamera('Walkthrough',new Vector3(6,LEVEL.eye,-12),scene);camera.minZ=.07;camera.maxZ=180;camera.fov=1.05;camera.inputs.clear();
+const overview=new ArcRotateCamera('Estate overview',-Math.PI*.7,Math.PI*.31,83,new Vector3(0,1,4),scene);overview.fov=1.05;overview.minZ=.2;overview.maxZ=250;scene.activeCamera=overview;
+const player=new Vector3(6,LEVEL.ground,-12);let designView=false;let yaw=0,pitch=0,third=false,started=false,night=false,keys=new Set<string>(),quality='balanced',toastTimer=0,drag=false,lastX=0,lastY=0,elapsed=0;
 const avatar=new TransformNode('Visitor',scene);const shirt=new StandardMaterial('Visitor linen',scene);shirt.diffuseColor=Color3.FromHexString('#c8c9b7');const pants=new StandardMaterial('Visitor trousers',scene);pants.diffuseColor=Color3.FromHexString('#34413a');const skin=new StandardMaterial('Visitor skin',scene);skin.diffuseColor=Color3.FromHexString('#a77755');
 const torso=MeshBuilder.CreateCapsule('Visitor torso',{height:.75,radius:.2,tessellation:8},scene);torso.parent=avatar;torso.position.y=1.1;torso.material=shirt;
 const head=MeshBuilder.CreateSphere('Visitor head',{diameter:.31,segments:10},scene);head.parent=avatar;head.position.y=1.64;head.material=skin;
@@ -58,8 +58,12 @@ function go(id:string){const d=destinations.find(v=>v.id===id)!;player.set(d.x,d
 $('destinations').innerHTML=destinations.map((d,i)=>`<button class="destination" data-destination="${d.id}"><span>${String(i+1).padStart(2,'0')} &nbsp; ${d.name}</span><span>↗</span></button>`).join('');document.querySelectorAll<HTMLButtonElement>('[data-destination]').forEach(b=>b.onclick=()=>go(b.dataset.destination!));
 document.querySelectorAll<HTMLButtonElement>('[data-plan]').forEach(b=>b.onclick=()=>{$('planDiagram').innerHTML=b.dataset.plan==='site'?sitePlanSvg():floorPlanSvg(Number(b.dataset.plan));});
 const designViews:Record<string,{eye:number[];target:number[]}>= {
- arrival:{eye:[-28,9,-26],target:[-1,3.5,7]},rear:{eye:[28,17,40],target:[0,3,15]},
- court:{eye:[4,6.5,6.5],target:[0,3.8,15]},aerial:{eye:[-38,48,-43],target:[0,0,5]}
+ arrival:{eye:[-14,1.65,-21],target:[1,3,0]},rear:{eye:[-24,1.65,30],target:[1,3.4,19]},
+ court:{eye:[9.8,1.65,9.1],target:[11.6,1.2,6.5]},courtSky:{eye:[10.2,5.85,4.25],target:[11.25,1,7.5]},aerial:{eye:[-34,43,-35],target:[2,0,5]},
+ social:{eye:[7.5,1.65,19],target:[8,1.6,8]},foyer:{eye:[3,1.65,-3.5],target:[3,2,8]},
+ overlook:{eye:[4.5,5.85,12],target:[4.5,1.5,5]},stair:{eye:[-2.8,5.85,-4.5],target:[-4.6,2.5,1]},
+ stairLower:{eye:[-5.1,3.75,1.5],target:[-2.9,4,-3.5]},stairRoof:{eye:[-2.8,10.05,-4.5],target:[-4.6,6.7,1]},roof:{eye:[-1,10.05,-3.7],target:[9,9.2,9]}
+
 };
 function showDesignView(id:string){
  const view=designViews[id];if(!view){enter(false);return;}
@@ -94,13 +98,13 @@ engine.runRenderLoop(()=>{
   const nx=player.x+dx,nz=player.z+dz;if(Math.abs(nx)<SITE_SIDE/2-.35&&!blocked(nx,player.z,player.y,world.obstacles))player.x=nx;if(Math.abs(nz)<SITE_SIDE/2-.35&&!blocked(player.x,nz,player.y,world.obstacles))player.z=nz;
   const floor=groundHeight(player.x,player.z,player.y,world.surfaces);player.y=floor>=player.y?floor:Math.max(floor,player.y-dt*5);
   avatar.position.copyFrom(player);avatar.rotation.y=yaw;const walking=forward||side;limbs.forEach((l,i)=>l.rotation.x=walking?Math.sin(elapsed*9+(i<2?0:Math.PI))*.25:0);
-  const eye=player.add(new Vector3(0,1.65,0));const look=new Vector3(Math.sin(yaw)*Math.cos(pitch),-Math.sin(pitch),Math.cos(yaw)*Math.cos(pitch));
+  const eye=player.add(new Vector3(0,LEVEL.eye,0));const look=new Vector3(Math.sin(yaw)*Math.cos(pitch),-Math.sin(pitch),Math.cos(yaw)*Math.cos(pitch));
   if(third){const desired=eye.subtract(look.scale(3.4)).add(new Vector3(0,.7,0));const delta=desired.subtract(eye);const hit=scene.pickWithRay(new Ray(eye,delta.normalizeToNew(),delta.length()),m=>!!m.metadata?.solid||world.doors.some(d=>d.leaf===m));camera.position.copyFrom(hit?.hit?eye.add(delta.normalizeToNew().scale(Math.max(.25,hit.distance-.25))):desired);camera.setTarget(eye.add(look.scale(4)));}
   else{camera.position.copyFrom(eye);camera.rotation.set(pitch,yaw,0);}
   const d=nearestDoor();$('prompt').classList.toggle('hidden',!d);if(d)$('prompt').textContent=`E · ${d.open?'Close':'Open'} ${d.name}`;
  }
  world.update(dt,designView?overview.position:player);scene.render();
- if(++tick%20===0){let name='Estate gardens';const r=rooms.find(r=>Math.abs(player.y-r.floor*STOREY)<1&&Math.abs(player.x-r.x)<r.width/2&&Math.abs(player.z-r.z)<r.depth/2);if(player.y>8)name='Rooftop terrace';else if(r)name=r.name;else if(Math.abs(player.x)<5&&player.z>6&&player.z<14)name=player.y>3?'Courtyard gallery':'Courtyard';else if(player.z<-3)name='Arrival court';else if(player.z>22)name='Pool terrace';else if(Math.abs(player.x)<5)name=player.z>14?'Living & dining':'Entrance hall';$('location').textContent=name;$('stats').textContent=`${Math.round(engine.getFps())} FPS · ${night?'Nightfall':'Daylight'} · ${quality}`;const dot=document.getElementById('mapDot')!;if(dot){dot.setAttribute('cx',String(player.x));dot.setAttribute('cy',String(-player.z));}}
+ if(++tick%20===0){let name='Estate gardens';const r=rooms.find(r=>Math.abs(player.y-r.floor*STOREY)<1&&Math.abs(player.x-r.x)<r.width/2&&Math.abs(player.z-r.z)<r.depth/2);if(player.y>8)name='Rooftop terrace';else if(r)name=r.name;else if(inside(player.x,player.z,ARCH.courtyard))name='Family courtyard';else if(player.z<-3)name='Arrival court';else if(player.z>22)name='Pool terrace';else if(inside(player.x,player.z,ARCH.living)||inside(player.x,player.z,ARCH.dining))name='Living & dining';else if(inside(player.x,player.z,ARCH.foyer))name='Entrance foyer';$('location').textContent=name;$('stats').textContent=`${Math.round(engine.getFps())} FPS · ${night?'Nightfall':'Daylight'} · ${quality}`;const dot=document.getElementById('mapDot')!;if(dot){dot.setAttribute('cx',String(player.x));dot.setAttribute('cy',String(-player.z));}}
 });
 scene.executeWhenReady(()=>{$('loading').classList.add('hidden');});
 }

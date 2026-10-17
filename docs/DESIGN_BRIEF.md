@@ -1,83 +1,79 @@
-# Dreamhome — sheltered courtyard scheme
+# Dreamhome — framed arrival and offset family court
 
-## Requirements retained
+## Design intent and retained requirements
 
-An original modern contemporary home on one acre, intended for a future site in Uganda. Babylon.js, TypeScript and Vite remain the implementation. Two residential floors contain **two ground-floor ensuite bedrooms and four upper-floor ensuite bedrooms**, including the primary. There is one additional guest half-bathroom, a study, gym, cinema, kitchen, living/dining pavilion, balconies, accessible rooftop, outdoor pool, roundabout, detached three-car garage, gazebo, high boundary wall and separate pedestrian/vehicle gates.
+An original contemporary villa for a future site in Uganda, implemented in Babylon.js, TypeScript and Vite. The latest supplied redesign brief supersedes the former oversized courtyard scheme. The references inform depth, selective glazing, substantial frames and warm concealed lighting; no reference façade, garage arrangement or floor plan is reproduced.
 
-The **courtyard is inside the house**, enclosed on all four sides by the entrance cross wing, bedroom wings and living pavilion. It remains open through both floors and the roof. The living room has a real upper-floor opening with a guarded overlook, not a floor hidden by a camera trick.
+The house has two residential floors: two ground-floor ensuite bedrooms and four upstairs, including the primary. It retains a separate primary walk-in closet, guest half-bath, study, gym, cinema, pantry, balconies, accessible roof terrace and genuine double-height living room. The one-acre site retains the roundabout, detached three-car garage, pool, gazebo, landscaping, high wall and separate vehicle and pedestrian gates. The square boundary is provisional, not surveyed.
 
-## Architectural composition
+## Plan and composition
 
-A projecting, single-storey stone study establishes the western edge of the arrival court. The entrance sits four metres behind its front face, under a modest canopy supported by a stone blade and the entrance wall. The eastern wellness wing starts farther back; its upper lounge recedes again behind a sheltered vertical screen. No ceremonial raised stair or attached garage is introduced.
+The entrance opens into a short foyer with an immediate view into the living room. Living, dining and kitchen form one connected social sequence. A clear walking aisle along the eastern side of the living furniture continues through dining to the rear terrace; the island sits beside this route. The enclosed pantry is behind the kitchen. The bedroom corridor is separated from living by the media spine and entered from the foyer or dining circulation. The guest WC is discreetly in the front private vestibule. The cinema is across the house from the west bedroom wing.
 
-The western bedroom wing steps outward and then back toward the garden. Upstairs, the larger primary suite joins the west wing into a quieter private volume. To the rear, sheltered balconies frame the double-height living pavilion. Their columns continue to ground, while the central living glazing faces the protected garden. Roof guards follow the actual stepped outline; the courtyard and rooftop stair opening remain guarded and open.
+The **4.5 × 5 m internal court** sits beside living and kitchen. It is surrounded by building on all four sides, open through both storeys and the roof, with two glazed sliding thresholds, seating for approximately six and a small planter. Fixed sidelights separate the sheltered social route from the outdoor court. Perimeter slot drains express drainage intent; actual falls, outlets, overflow and waterproofing remain engineering work. The court is not on the entrance-to-living route.
 
-Warm light plaster is the principal material, with coursed stone concentrated at arrival and the west base, charcoal frames, and selective oak at the entrance, loggia and pergola. Deep window reveals, an entrance soffit and courtyard edge beams create shade and depth. Warm concealed strips mark thresholds and inhabited interiors rather than tracing every façade edge.
+A deep central entrance frame and tall stone stair blade establish the front hierarchy. The west rear bedroom wing steps outward two metres. The quieter west front wing has a covered upper loggia; the east wing starts farther back. The central upper gallery glazing is recessed two metres behind the entrance wall. At the rear, two sheltered bedroom balconies flank a six-metre-deep carved upper terrace. Columns continue to ground; the terrace has no roof slab over it. The palette is light warm plaster, fine textured stone, charcoal frames and selective oak soffits/storage. Protected courtyard and garden sides have the larger glass openings; the street remains substantially solid.
 
-The supplied image informed only the restrained glazing, sheltered arrival, depth, light and material contrast. Its distinctive framing, elevation proportions, raised stair and garage composition were not reproduced. All geometry, diagrams and procedural textures are authored in source; no reference image or external model is embedded.
+The upper living overlook is a furnished, three-metre-deep gallery connected to the private hall, east bedroom and garden terrace. It looks into the **actual 9 × 10 m living void**. A guard protects each accessible floor edge. The roof above living remains intact; the upper floor below it does not.
 
-## Dimensions and assumptions
+## Named dimensions and room schedule
 
-All dimensions are nominal concept dimensions in metres; clear sizes reduce for walls and finishes. X runs across the plot, Y is up, and +Z faces the rear garden. This is not a surveyed compass orientation.
+Coordinates are metres: Y up, +Z toward the rear garden. Compass orientation is unresolved. `LEVEL` and `ARCH` in `src/plan.ts` are the primary dimensions. Room sizes below are nominal modules, before wall/finish deductions; bedroom areas include ensuite/storage.
 
-| Element | Current scheme |
+| Element | Nominal dimension |
 | --- | --- |
-| Provisional square acre | 63.61 × 63.61 m; 4,046.8564 m² |
-| Main envelope | Staggered bounds X −17 to +16, Z −7 to +23; not a filled rectangle |
-| Internal courtyard | 10 × 8 m; X −5 to +5, Z +6 to +14 |
-| Side circulation galleries | 2 m nominal width, continuous along both wings |
-| Residential floor datums | 0 and 4.2 m |
-| Rooftop terrace datum | 8.4 m |
-| Typical ceilings | Approximately 3.8 m above each residential floor |
-| Living pavilion | 14 × 8 m; central 10 × 4.4 m double-height void, approximately 8 m tall |
-| Living overlook | 10 × 1.8 m; additional rear gallery and side circulation |
-| Primary dressing room | 8.6 × 4.5 m, with wardrobe banks, island and a separate door |
-| Ensuites | Approximately 3.1 × 3.1 m each, with basin, toilet and shower |
-| Stair flights | Each 8 m run, 1.8 m nominal width, 4.2 m rise, 24 visual risers |
-| Detached garage | 12 × 9 m, three independently animated bays |
-| Pool water | 11.5 × 4 m, within the rear terrace |
-| Boundary walls | Approximately 3 m; separate pedestrian and vehicle entries |
+| Square-acre assumption | 63.61 × 63.61 m; 4,046.8564 m² |
+| Main wing envelope | X −15 to +17; Z −5 to +20, with arrival frame and rear balconies beyond |
+| Ground / upper / roof finished floors | 0 / 4.2 / 8.4 m |
+| Eye height | 1.65 m above walking support |
+| Typical interior ceiling | Approximately 3.8 m |
+| Living room and upper void | 9 × 10 m; approximately 8 m high |
+| Dining / open kitchen | 9 × 9 m / 8 × 10 m |
+| Courtyard | 4.5 × 5 m, 22.5 m² |
+| Upper overlook | 9 × 3 m |
+| Primary dressing room | 5.7 × 3.2 m, 18.24 m², separate door and two storage banks |
+| Pantry | 3.2 × 3.3 m |
+| Ensuites | 3.1 × 3.1 m each; toilet, basin and shower |
+| Private corridor | 2 m nominal |
+| Return stair | Two 1.6 m flights per storey; 4.2 m run and 2.1 m rise each; 12 risers each |
+| Intermediate stair landings | 3.9 × 1.8 m at 2.1 and 6.3 m |
+| Detached garage / pool water | 12 × 9 m / 11.5 × 4 m |
+| Perimeter wall | Approximately 3 m |
 
-## Room schedule
-
-| Floor | Space | Nominal module | Arrangement |
-| --- | --- | --- | --- |
-| Ground | Arrival study | 9 × 12 m | Projecting southwest wing |
-| Ground | Garden suite 01 | 10 × 9 m | West courtyard wing; full ensuite |
-| Ground | Garden suite 02 | 9 × 9 m | West rear wing; full ensuite |
-| Ground | Wellness studio | 7 × 8 m | Recessed southeast wing |
-| Ground | Cinema | 8 × 8 m | East courtyard wing; high exterior aperture |
-| Ground | Kitchen / breakfast | 9 × 8 m | East garden wing; 4.2 × 1.8 m island |
-| Ground | Living / dining | 14 × 8 m | Rear cross wing; courtyard-to-garden connection |
-| Ground | Guest half-bath | 2.4 × 2.7 m | Off foyer, door facing away from stair guard |
-| Upper | Suite 03 | 8 × 10 m | West front, recessed behind study; full ensuite |
-| Upper | Primary suite | 9 × 16 m | West courtyard/garden wing; includes dressing room and full ensuite |
-| Upper | Upper lounge | 7 × 6 m | East front, with screened loggia |
-| Upper | Suite 04 | 8 × 8 m | East courtyard wing; full ensuite |
-| Upper | Suite 05 | 8 × 8 m | East rear; full ensuite and garden balcony |
+| Floor | Room | Nominal module |
+| --- | --- | --- |
+| Ground | Study | 7 × 6 m |
+| Ground | Garden suite 01, ensuite | 11 × 8 m |
+| Ground | Garden suite 02, ensuite | 13 × 9 m |
+| Ground | Cinema | 8 × 7 m |
+| Ground | Gym | 3.5 × 6 m |
+| Ground | Guest half-bath | 3 × 2 m |
+| Upper | Suite 03, ensuite | 7 × 6 m |
+| Upper | Suite 04, ensuite | 11 × 8 m |
+| Upper | Primary, ensuite and separate dressing room | 13 × 9 m |
+| Upper | Suite 05, ensuite | 8 × 10 m |
+| Upper | Family lounge | 8 × 6.6 m |
 
 [Ground plan](views/ground-plan.svg) · [Upper plan](views/upper-plan.svg) · [Site plan](views/site-plan.svg) · [Paired plans](views/floor-plans.png)
 
-## Circulation and structural intent
+## Stairs, surfaces and structural intent
 
-The pedestrian gate has a separate path around the arrival planting to the sheltered front door. The roundabout connects to a dedicated garage approach. From the foyer, side galleries complete a loop around the courtyard and connect the bedrooms, shared rooms and rear pavilion. The powder-room door opens east toward the foyer, clear of the stair's lower guard.
+A broad return stair was selected instead of a curved stair: it fits beside the private foyer, keeps the social route clear, and gives predictable treads, landings and a matching movement path. Four flights connect the three datums. Each uses 175 mm visual risers and 350 mm treads with continuous ramp support for smooth walking, handrails and guards. The landings allow a full turn without crossing a guard. Headroom is governed by the full-storey spacing and the explicit stair slab openings.
 
-One straight stair rises eastward to the first-floor landing; the gallery behind it returns to the west end of the parallel roof stair. Both flights can be walked in both directions. Visual treads and movement ramps share named dimensions. Openings have guards and the landings remain clear. The primary dressing room is reached from its bedroom, not through a bathroom. Balcony doors avoid the ensuites. A rear living door opens to the garden.
+Floor plates are a disjoint union of named footprint rectangles. Upper living and stair voids and the roof courtyard/terrace openings are subtracted explicitly. Rugs and bathroom finishes are thin decorative meshes, not extra walking surfaces. Social rooms, court thresholds and rear social terrace share the ground datum. Wall tops stop at slab undersides to avoid coplanar exposed faces. Doors and their collision rectangles animate together; front vestibule doors swing into their rooms to preserve the passage.
 
-The courtyard piers and edge beams establish a legible supporting frame. Upper rooms sit within lower wing footprints; rear balcony posts continue to ground. The roof stair canopy has four posts. The entrance canopy bears against the cross wing and a stone blade. Wall and slab thicknesses are illustrative: foundation design, transfer beams, reinforcement, lateral stability, long-span living-roof design and load paths require structural engineering.
+The source uses shared wall/opening/door/slab components and plan-derived destinations. Balcony posts, portico piers and rooftop pavilion supports express structural intent. Wall thicknesses, slab spans, connections, foundations, lateral stability and the living-roof span require a structural engineer; the visualization is not a construction detail.
+
+## Rendering diagnosis and verification scope
+
+The earlier scene was compared in the actual browser with shadows disabled, then procedural textures disabled. Jagged shadow edges disappeared in the first comparison; repeated coursing/banding disappeared in the second. Separate code inspection found overlapping floor slabs and raised decorative finishes. The redesign removes the coursing pattern, gives box faces dimension-based texture coordinates, trims wall tops below slabs and creates nonoverlapping indoor plates. This addresses distinct causes rather than attributing every artifact to one source. Shadow aliasing and transparent-surface ordering remain possible in this lightweight renderer.
+
+The test suite checks the six-suite schedule, court and living voids, disjoint plates, every opened doorway, flat social route, all stair flights and landings in both directions, and connected routes to rooms, bathrooms, dressing room, pantry, balconies and rooftop. Actual browser inspection and interaction results are documented in the README and `views/browser-check.json`, separately from these programmatic checks.
 
 ## Privacy, climate and later professional verification
 
-The street-facing openings are selective and mostly high-level, with deep reveals. The upper lounge is recessed behind vertical screening; the street has no exposed projecting bedroom balcony or external staircase to an upper window. Larger bedroom openings face the courtyard galleries and side gardens; the living pavilion and rear balconies address the protected garden. Entry visibility and the pedestrian approach remain open.
+Selective, recessed street openings and the absence of an external stair or projecting street bedroom balcony support privacy. The high boundary wall and detached garage do not establish a security rating. The entrance remains visible from the approach. Larger openings face protected gardens and the internal court.
 
-Window count is not a security specification. The current rendered glazing is fixed and simplified. Operable ventilation panels, cross-ventilation, insect screens, safe bedroom escape openings, fire escape strategy, glass/security hardware and guard details must be resolved with local professionals. High-level street windows are **not** assumed to provide bedroom emergency escape. The courtyard and rear door provide additional routes at ground level, but no fire-safety compliance is claimed.
+Rendered windows are currently fixed. Operable ventilation, insect screens, cross-ventilation, safe bedroom escape, fire strategy, security glazing, hardware and guard details must be designed and checked locally. Fewer windows alone are not assumed to make the house secure. Verify the actual Ugandan boundary, access, orientation, setbacks, climate, rain protection, drainage, roof falls/waterproofing, service spaces and approvals with local professionals.
 
-Before construction, verify the actual Ugandan site boundary, access and orientation, planning requirements, setbacks, drainage and heavy-rain protection, courtyard drainage, roof waterproofing and falls, solar shading, utility/service spaces and all applicable local approvals. These remain concept-stage assumptions, not approved building specifications.
-
-## Visual scope and verification
-
-The current scheme uses procedural architecture and simplified furniture, planting, glass, mirrors, water and avatar. It does not contain finished photorealistic models, baked lightmaps or physically simulated water. Editable source remains in `src/plan.ts`, `src/world.ts` and `src/diagrams.ts`; no large asset downloads occur at startup.
-
-A supported headless Chrome/WebGL session rendered the actual application. Exterior, courtyard, aerial and living-overlook images were viewed during design review. Keyboard-driven browser checks exercised every door and gate, both stair flights up/down, first/third person, room lighting, day/night, quality presets and plan tabs. Automated geometry tests separately check the schedule, collision passages, surfaces, guarded voids and route connectivity.
-
-Pointer-lock capture, touch gestures and performance at Retina resolution on the user's 13-inch M4 MacBook Air (16 GB) remain unverified. The FPS display is diagnostic, not a measured performance promise. Procedural materials, shadow aliasing and transparent-surface ordering remain visible limitations. Licensed optimized GLB furnishings, authored materials and baked lighting are a later stage, retaining editable sources and the quality presets.
+Furniture, planting, water, mirrors and the avatar remain simplified procedural geometry. Licensed optimized GLB assets, authored materials and baked lighting are later visual refinements. No large remote models load at startup. Target-device Retina performance, pointer lock and touch gestures still require manual verification. This is an editable architectural visualization, not a photorealistic asset pack or approved engineering/permit drawing.

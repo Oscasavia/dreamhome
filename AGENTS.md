@@ -4,11 +4,13 @@
 
 Read `docs/DESIGN_BRIEF.md` before changing the architecture. The courtyard is **inside the house footprint**, not a detached garden. Ground level has two ensuite bedrooms; the upper level has four, including the primary. Preserve a genuine double-height living room with an upper overlook and spacious rooms. Do not fill the living void with a floor or the courtyard with a roof.
 
+The latest redesign uses a compact 4.5 × 5 m offset internal courtyard. Preserve the short foyer → living → dining/open kitchen route, separate pantry, private bedroom hall, and separate primary dressing room. Floor plates must remain nonoverlapping, with finished datums from `LEVEL`. Decorative rugs and finishes must not become walking surfaces. The return stair has four flights and two intermediate landings; its visual path and movement support must agree.
+
 ## Workflow
 
 - This is a Babylon.js + TypeScript + Vite browser application. Do not replace it with React, a database, a static rendered image, or a Godot project without a user request.
 - Run `npm ci`, `npm test`, and `npm run build` after relevant code changes.
-- Inspect the live view in a supported browser when available. Verify arrival, every room doorway, both stair flights, roof access, both camera modes, lighting, gates and day/night presets.
+- Inspect the live view in a supported browser when available. Verify arrival, every room doorway, all four stair flights and both return landings, roof access, both camera modes, lighting, gates and day/night presets.
 - Do not claim an FPS target or photorealistic finish without measuring / viewing the actual result.
 - All coordinates are metres; Y is up and +Z points toward the rear garden.
 - Keep geometry and colliders aligned. Movement uses obstacle rectangles and explicit floor surfaces, not a full physics engine.

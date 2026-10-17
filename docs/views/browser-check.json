@@ -2,31 +2,36 @@
   "doors": [
     "Vehicle gate",
     "Pedestrian gate",
-    "Arrival study",
+    "Study",
     "Garden suite 01",
     "Garden suite 01 bathroom",
     "Garden suite 02",
     "Garden suite 02 bathroom",
+    "Cinema",
     "Wellness studio",
-    "Private cinema",
-    "Kitchen & breakfast",
     "Bedroom suite 03",
     "Bedroom suite 03 bathroom",
-    "Primary suite balcony",
-    "Primary suite",
-    "Primary suite bathroom",
-    "Upper lounge loggia",
-    "Recessed upper lounge",
     "Bedroom suite 04",
     "Bedroom suite 04 bathroom",
-    "Bedroom suite 05 balcony",
+    "Primary suite",
+    "Primary suite balcony",
+    "Primary suite bathroom",
     "Bedroom suite 05",
+    "Bedroom suite 05 balcony",
     "Bedroom suite 05 bathroom",
-    "Primary walk-in closet",
-    "Front entrance",
-    "Front entrance right",
-    "Pool terrace door",
+    "Family lounge",
+    "Courtyard viewing alcove",
+    "Private wing",
+    "Garden private hall",
+    "Upper private gallery",
+    "Enclosed pantry",
     "Guest half bathroom",
+    "Primary walk-in closet",
+    "Courtyard from living",
+    "Courtyard from kitchen",
+    "Upper garden terrace",
+    "Front entrance",
+    "Rear garden doors",
     "Garage bay 1",
     "Garage bay 2",
     "Garage bay 3"
@@ -34,28 +39,98 @@
   "stairs": [
     {
       "floor": 0,
+      "first": [
+        -5.1,
+        2.1,
+        1.5398400000572188
+      ],
       "up": [
-        4.7095200000286095,
+        -2.9,
         4.2,
-        1
+        -3.9412800001144395
+      ],
+      "returnLanding": [
+        -2.9,
+        2.1,
+        1.5393599999427785
       ],
       "down": [
-        -4.708560000085828,
+        -5.1,
         0,
-        1
+        -3.9355199998855577
       ]
     },
     {
       "floor": 1,
+      "first": [
+        -5.1,
+        6.300000000000001,
+        1.5417599999427793
+      ],
       "up": [
-        4.71096000008583,
+        -2.9,
         8.4,
-        4
+        -3.941759999942778
+      ],
+      "returnLanding": [
+        -2.9,
+        6.300000000000001,
+        1.5422400000572187
       ],
       "down": [
-        -4.709520000028608,
+        -5.1,
         4.2,
-        4
+        -3.938879999828338
+      ]
+    }
+  ],
+  "routes": [
+    {
+      "name": "entry to living",
+      "end": [
+        3,
+        0,
+        2.042240000057218
+      ]
+    },
+    {
+      "name": "living circulation",
+      "end": [
+        6.5,
+        0,
+        11.359999999999996
+      ]
+    },
+    {
+      "name": "dining to kitchen",
+      "end": [
+        12.019999999999998,
+        0,
+        11.3
+      ]
+    },
+    {
+      "name": "dining to garden",
+      "end": [
+        6.5,
+        0,
+        21.30128000011443
+      ]
+    },
+    {
+      "name": "private hall",
+      "end": [
+        -1,
+        0,
+        18.00112000017165
+      ]
+    },
+    {
+      "name": "upper private hall",
+      "end": [
+        -1,
+        4.2,
+        18.077440000057212
       ]
     }
   ],
@@ -68,6 +143,32 @@
     "balanced quality",
     "high quality",
     "floor plan tabs"
+  ],
+  "performance": [
+    {
+      "preset": "low",
+      "medianFrameMs": 16.600000023841858,
+      "p95FrameMs": 17.30000001192093,
+      "renderWidth": 969,
+      "renderHeight": 606,
+      "meshes": 535
+    },
+    {
+      "preset": "balanced",
+      "medianFrameMs": 16.69999998807907,
+      "p95FrameMs": 17.30000001192093,
+      "renderWidth": 1600,
+      "renderHeight": 1000,
+      "meshes": 535
+    },
+    {
+      "preset": "high",
+      "medianFrameMs": 16.69999998807907,
+      "p95FrameMs": 17.799999952316284,
+      "renderWidth": 1600,
+      "renderHeight": 1000,
+      "meshes": 535
+    }
   ],
   "errors": []
 }
