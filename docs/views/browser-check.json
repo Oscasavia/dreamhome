@@ -21,7 +21,9 @@
     "Bedroom suite 05 bathroom",
     "Family lounge",
     "Courtyard viewing alcove",
-    "Private wing",
+    "Suite 04 west loggia",
+    "Family lounge east loggia",
+    "Bedroom hall privacy",
     "Garden private hall",
     "Upper private gallery",
     "Enclosed pantry",
@@ -32,6 +34,7 @@
     "Upper garden terrace",
     "Front entrance",
     "Rear garden doors",
+    "Rooftop stair enclosure",
     "Garage bay 1",
     "Garage bay 2",
     "Garage bay 3"
@@ -42,22 +45,22 @@
       "first": [
         -5.1,
         2.1,
-        1.5398400000572188
+        1.5403199998855577
       ],
       "up": [
         -2.9,
         4.2,
-        -3.9412800001144395
+        -3.9393599999427793
       ],
       "returnLanding": [
         -2.9,
         2.1,
-        1.5393599999427785
+        1.5398400000572199
       ],
       "down": [
         -5.1,
         0,
-        -3.9355199998855577
+        -3.9398400000572185
       ]
     },
     {
@@ -65,32 +68,56 @@
       "first": [
         -5.1,
         6.300000000000001,
-        1.5417599999427793
+        1.538879999828338
       ],
       "up": [
         -2.9,
         8.4,
-        -3.941759999942778
+        -3.938399999999999
       ],
       "returnLanding": [
         -2.9,
         6.300000000000001,
-        1.5422400000572187
+        1.5393600002288812
       ],
       "down": [
         -5.1,
         4.2,
-        -3.938879999828338
+        -3.9446399997711166
       ]
     }
   ],
   "routes": [
     {
+      "name": "foyer to stair opening",
+      "end": [
+        -1.559519999885558,
+        0,
+        -2.1
+      ]
+    },
+    {
+      "name": "stair approach",
+      "end": [
+        -1.5,
+        0,
+        -4.3439999999999985
+      ]
+    },
+    {
+      "name": "stair bottom landing",
+      "end": [
+        -5.102879999828338,
+        0,
+        -4.3
+      ]
+    },
+    {
       "name": "entry to living",
       "end": [
         3,
         0,
-        2.042240000057218
+        2.040320000171656
       ]
     },
     {
@@ -98,13 +125,13 @@
       "end": [
         6.5,
         0,
-        11.359999999999996
+        11.355679999828334
       ]
     },
     {
       "name": "dining to kitchen",
       "end": [
-        12.019999999999998,
+        12.01712000017166,
         0,
         11.3
       ]
@@ -114,7 +141,7 @@
       "end": [
         6.5,
         0,
-        21.30128000011443
+        21.3008
       ]
     },
     {
@@ -122,7 +149,7 @@
       "end": [
         -1,
         0,
-        18.00112000017165
+        18.077920000171652
       ]
     },
     {
@@ -130,7 +157,23 @@
       "end": [
         -1,
         4.2,
-        18.077440000057212
+        18.08271999988557
+      ]
+    },
+    {
+      "name": "west loggia",
+      "end": [
+        -11.5,
+        4.2,
+        10.401119999885555
+      ]
+    },
+    {
+      "name": "east loggia",
+      "end": [
+        15.6,
+        4.2,
+        3.441120000171661
       ]
     }
   ],
@@ -147,27 +190,27 @@
   "performance": [
     {
       "preset": "low",
-      "medianFrameMs": 16.600000023841858,
+      "medianFrameMs": 16.69999998807907,
       "p95FrameMs": 17.30000001192093,
       "renderWidth": 969,
       "renderHeight": 606,
-      "meshes": 535
+      "meshes": 550
     },
     {
       "preset": "balanced",
       "medianFrameMs": 16.69999998807907,
-      "p95FrameMs": 17.30000001192093,
+      "p95FrameMs": 17.399999976158142,
       "renderWidth": 1600,
       "renderHeight": 1000,
-      "meshes": 535
+      "meshes": 550
     },
     {
       "preset": "high",
       "medianFrameMs": 16.69999998807907,
-      "p95FrameMs": 17.799999952316284,
+      "p95FrameMs": 17.100000023841858,
       "renderWidth": 1600,
       "renderHeight": 1000,
-      "meshes": 535
+      "meshes": 550
     }
   ],
   "errors": []

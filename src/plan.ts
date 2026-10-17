@@ -24,10 +24,10 @@ export const rooms:Room[]=[
  room('gym','Wellness studio',0,bounds(13.5,17,4,10),'gym',{x:14.6,z:10,along:'x',width:1.4}),
  room('kitchen','Open kitchen',0,ARCH.kitchen,'kitchen',{x:9,z:12,along:'z',width:5},{open:true}),
  room('suite-3','Bedroom suite 03',1,bounds(-13,-6,-3,3),'bedroom',{x:-8,z:-3,along:'x',width:1.4},{ensuite:true}),
- room('suite-4','Bedroom suite 04',1,bounds(-13,-2,3,11),'bedroom',{x:-2,z:4.2,along:'z',width:1.4},{ensuite:true}),
+ room('suite-4','Bedroom suite 04',1,bounds(-10,-2,3,11),'bedroom',{x:-2,z:4.2,along:'z',width:1.4},{ensuite:true}),
  room('master','Primary suite',1,bounds(-15,-2,11,20),'bedroom',{x:-2,z:12.2,along:'z',width:1.4},{ensuite:true,master:true}),
  room('suite-5','Bedroom suite 05',1,bounds(9,17,10,20),'bedroom',{x:9,z:11.7,along:'z',width:1.4},{ensuite:true}),
- room('lounge','Family lounge',1,bounds(9,17,-3,3.6),'lounge',{x:9,z:-1.4,along:'z',width:1.4})
+ room('lounge','Family lounge',1,bounds(9,14.4,-3,3.6),'lounge',{x:9,z:-1.4,along:'z',width:1.4})
 ];
 export const roomRect=(r:Room):Rect=>({x:r.x,z:r.z,w:r.width,d:r.depth});
 export const roomEntry=(r:Room)=>r.entry;
@@ -70,6 +70,8 @@ export const destinations=[
  {id:'courtyard',name:'Family courtyard',x:9.75,y:LEVEL.ground,z:7,yaw:0},
  {id:'upper',name:'Living overlook',x:4.5,y:LEVEL.upper,z:12,yaw:Math.PI},
  {id:'primary',name:'Primary private hall',x:-1,y:LEVEL.upper,z:13,yaw:-Math.PI/2},
+ {id:'west-loggia',name:'Suite 04 west loggia',x:-11.5,y:LEVEL.upper,z:5.6,yaw:-Math.PI/2},
+ {id:'east-loggia',name:'Family lounge east loggia',x:15.6,y:LEVEL.upper,z:.5,yaw:Math.PI/2},
  {id:'roof',name:'Rooftop terrace',x:4,y:LEVEL.roof,z:8,yaw:0},
  {id:'pool',name:'Pool & gazebo',x:3,y:LEVEL.ground,z:25,yaw:-Math.PI/2},
  {id:'garage',name:'Detached three-car garage',x:23,y:LEVEL.ground,z:-15,yaw:0}

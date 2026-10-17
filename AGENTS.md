@@ -6,6 +6,8 @@ Read `docs/DESIGN_BRIEF.md` before changing the architecture. The courtyard is *
 
 The latest redesign uses a compact 4.5 × 5 m offset internal courtyard. Preserve the short foyer → living → dining/open kitchen route, separate pantry, private bedroom hall, and separate primary dressing room. Floor plates must remain nonoverlapping, with finished datums from `LEVEL`. Decorative rugs and finishes must not become walking surfaces. The return stair has four flights and two intermediate landings; its visual path and movement support must agree.
 
+Exterior composition is authored in `src/facades.ts`; do not restore automatic identical room-by-room side windows. Preserve both accessible recessed side loggias and the broad foyer-to-stair opening. Keep the bedroom privacy threshold beyond the stair approach and retain the living media spine.
+
 ## Workflow
 
 - This is a Babylon.js + TypeScript + Vite browser application. Do not replace it with React, a database, a static rendered image, or a Godot project without a user request.

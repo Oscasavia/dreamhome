@@ -5,6 +5,7 @@ import {Scene} from '@babylonjs/core/scene';
 import {Vector3} from '@babylonjs/core/Maths/math.vector';
 import {createWorld} from '../src/world';
 import {rooms,roomRect,ensuiteRect,SITE_SIDE,ACRE_M2,STOREY,LEVEL,ARCH,groundPlates,upperPlates,roofPlates,stairs,stairPoint,groundHeight,blocked,destinations} from '../src/plan';
+import {ENVELOPE,sideWalls} from '../src/facades';
 function fixture(){const engine=new NullEngine(),scene=new Scene(engine),world=createWorld(scene,true);return {world,scene,done(){scene.dispose();engine.dispose();}};}
 function openAll(w:ReturnType<typeof createWorld>){for(const d of w.doors)d.open=true;for(let i=0;i<80;i++)w.update(.05,new Vector3());}
 test('six generous suites, compact internal court, separate pantry and dressing room',()=>{
@@ -55,8 +56,35 @@ test('all destinations, private rooms, baths, closet, pantry, galleries and terr
   const reach=(x:number,z:number,name:string)=>assert.ok(seen.has(cell(x,z)),`${name} disconnected at ${x},${z}, floor ${level}`);
   for(const r of rooms.filter(r=>r.floor===level)){const e=r.entry;reach(e.x+(e.along==='x'?e.width/2:Math.sign(r.x)*.6),e.z+(e.along==='z'?e.width/2:.6),r.name);if(r.ensuite){const b=ensuiteRect(r);reach(b.x-.25,b.z-.8,r.name+' bath');}}
   if(!level){reach(10,7,'courtyard');reach(15,17.5,'pantry');reach(-10.5,-4,'powder');}
-  if(level===1){reach(11.25,4.25,'courtyard viewing alcove');reach(4.5,12,'overlook');reach(-8.5,12.8,'closet');reach(6.5,17,'garden terrace');reach(-4,21,'primary balcony');reach(11,21,'east balcony');}
+  if(level===1){reach(-11.5,5.6,'west loggia');reach(15.6,.5,'east loggia');reach(11.25,4.25,'courtyard viewing alcove');reach(4.5,12,'overlook');reach(-8.5,12.8,'closet');reach(6.5,17,'garden terrace');reach(-4,21,'primary balcony');reach(11,21,'east balcony');}
   if(level===2){reach(4,8,'roof');reach(11,13,'pergola');}
  }
  w.setNight(true);assert.equal(w.sun.intensity,.18);w.setNight(false);assert.equal(w.sun.intensity,1.15);w.zones[0].on=false;w.update(.05,new Vector3());assert.ok(w.zones.filter(z=>z.light.isEnabled()).length<=4);assert.equal(w.zones[0].light.isEnabled(),false);f.done();
+});
+
+test('loggias have useful depth, continuous support, working doors and guarded outer edges',()=>{
+ const f=fixture(),w=f.world;openAll(w);
+ for(const [r,outer,door] of [[ENVELOPE.westLoggia,-13,'Suite 04 west loggia'],[ENVELOPE.eastLoggia,17,'Family lounge east loggia']] as const){
+  assert.ok(r.w>=2.5&&r.d>=7);assert.ok(w.doors.some(d=>d.name===door));
+  for(let z=r.z-r.d/2+.6;z<=r.z+r.d/2-.6;z+=.25){assert.equal(groundHeight(r.x,z,LEVEL.upper,w.surfaces),LEVEL.upper);assert.equal(blocked(r.x,z,LEVEL.upper,w.obstacles),false);assert.equal(blocked(outer,z,LEVEL.upper,w.obstacles),true);}
+ }
+ // All external bathroom openings stay high-level, including the bath beside the west loggia.
+ for(const face of sideWalls)for(const o of face.openings){
+  assert.ok(o.at-o.width/2>=face.from&&o.at+o.width/2<=face.to);
+  for(const r of rooms.filter(r=>r.ensuite&&r.floor*STOREY===face.level)){
+   const b=ensuiteRect(r);if(Math.abs(Math.abs(face.x-b.x)-b.w/2)>.3)continue;
+   if(o.at+o.width/2>b.z-b.d/2&&o.at-o.width/2<b.z+b.d/2)assert.ok(o.sill>=2.4,face.name+' bathroom privacy');
+  }
+ }
+ f.done();
+});
+test('foyer opens directly to the stair while a separate door protects the bedroom hall',()=>{
+ const f=fixture(),w=f.world;
+ assert.equal(w.doors.some(d=>d.name==='Private wing'),false);assert.ok(w.doors.some(d=>d.name==='Bedroom hall privacy'));
+ // The arrival route needs no private-hall door operation.
+ const route=[[3,-2.1],[-1.5,-2.1],[-1.5,-4.3],[-5.1,-4.3]];
+ for(let i=1;i<route.length;i++){const a=route[i-1],b=route[i],n=Math.ceil(Math.hypot(b[0]-a[0],b[1]-a[1])/.05);for(let k=0;k<=n;k++){const x=a[0]+(b[0]-a[0])*k/n,z=a[1]+(b[1]-a[1])*k/n;assert.equal(blocked(x,z,0,w.obstacles),false,`foyer to stair ${x},${z}`);assert.equal(groundHeight(x,z,0,w.surfaces),0);}}
+ // A sight line from standing eye height to the lower treads crosses no wall collider; stair guard rectangles represent spaced balusters.
+ for(let t=0;t<=1;t+=.01){const x=3+(-5.1-3)*t,z=-2.2+(-1.8+2.2)*t,y=LEVEL.eye+(.9-LEVEL.eye)*t;assert.equal(w.obstacles.some(o=>o.name!=='Stair sloping guard'&&x>o.x-o.w/2&&x<o.x+o.w/2&&z>o.z-o.d/2&&z<o.z+o.d/2&&y>o.bottom&&y<o.top),false,'stair sightline');}
+ f.done();
 });

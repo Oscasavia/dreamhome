@@ -55,10 +55,12 @@ for(const floor of [0,1]){
  report.stairs.push({floor,first,up,returnLanding,down});
 }
 for(const [name,x,z,heading,distance] of [
+ ['foyer to stair opening',3,-2.1,-Math.PI/2,4.5],['stair approach',-1.5,-2.1,Math.PI,2.2],['stair bottom landing',-1.5,-4.3,-Math.PI/2,3.6],
  ['entry to living',3,-7,0,9],['living circulation',6.5,2,0,9.3],
  ['dining to kitchen',6.5,11.3,Math.PI/2,5.5],['dining to garden',6.5,11.3,0,10],
  ['private hall',-1,-2,0,20],['upper private hall',-1,-2,0,20]
 ]){const y=name.startsWith('upper')?4.2:0;const end=await move(x,y,z,heading,distance);if(Math.abs(end[1]-y)>.03)throw Error('Route level '+name);report.routes.push({name,end});}
+for(const [name,x,z,distance] of [['west loggia',-11.5,3.6,6.8],['east loggia',15.6,-2.4,5.8]]){const end=await move(x,4.2,z,0,distance);if(Math.abs(end[1]-4.2)>.03)throw Error('Loggia support');report.routes.push({name,end});}
 await evaluate("__dreamhome.go('foyer')");
 await key('KeyV');await key('KeyV','keyUp');if(!await evaluate('__dreamhome.status().third'))throw new Error('Third person failed');
 report.controls.push('third-person camera');

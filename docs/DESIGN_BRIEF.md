@@ -16,6 +16,16 @@ A deep central entrance frame and tall stone stair blade establish the front hie
 
 The upper living overlook is a furnished, three-metre-deep gallery connected to the private hall, east bedroom and garden terrace. It looks into the **actual 9 × 10 m living void**. A guard protects each accessible floor edge. The roof above living remains intact; the upper floor below it does not.
 
+## Exterior refinement and visible stair
+
+The entrance hierarchy is retained. Its main head now meets the roof slab underside, eliminating the disconnected inner ledge. A 550 mm lower canopy edge joins the upper slab, with protected oak beneath and a substantial timber entrance door between deep stone jambs. The stone arrival blade continues into a roof stair enclosure rather than terminating below an unrelated rooftop shelter. The roof exit has an animated glazed door and matching collision boundary.
+
+The long elevations are authored in `src/facades.ts`, independently of the room loop. The west elevation combines a continuous stone ground-floor base, a **3 × 8 m recessed upper loggia** belonging to Suite 04, and the existing two-metre projection of the primary wing. The east elevation pairs a **2.6 × 7 m family-lounge loggia** with a quieter stone link and protected garden suite. Both loggias occupy the existing floor and roof footprint; inward room walls create real usable recesses. They have room-connected sliding doors, solid 1.1 m outer parapets and piers carried to ground. The east front return wraps around the street corner; the west stone base and protected oak soffit turn its front corner. Rear balconies retain their arrangement with thicker supporting posts, deeper roof edges and sheltered oak soffits.
+
+Exterior walls are 480 mm nominal with glazing set 220 mm inward from their centreline, giving approximately 460 mm from the outer wall face to glass. Openings respond to bedroom, bathroom, cinema and study uses. Bathroom side windows are high-level, including the one facing the private west loggia. These visual privacy measures are not certified security or ventilation specifications.
+
+The study stays on the ground floor. A **4.8 m wide, 3.65 m high framed opening** replaces the former foyer-to-private-wing door, revealing the existing return stair. The bedroom privacy door is moved across the hall beyond the stair approach. The living media spine and direct social route remain intact. General interior styling is deferred: only furniture obstructing new doors/windows was moved, and the narrower family lounge retains one sofa to keep its entrance clear.
+
 ## Named dimensions and room schedule
 
 Coordinates are metres: Y up, +Z toward the rear garden. Compass orientation is unresolved. `LEVEL` and `ARCH` in `src/plan.ts` are the primary dimensions. Room sizes below are nominal modules, before wall/finish deductions; bedroom areas include ensuite/storage.
@@ -49,10 +59,10 @@ Coordinates are metres: Y up, +Z toward the rear garden. Compass orientation is 
 | Ground | Gym | 3.5 × 6 m |
 | Ground | Guest half-bath | 3 × 2 m |
 | Upper | Suite 03, ensuite | 7 × 6 m |
-| Upper | Suite 04, ensuite | 11 × 8 m |
+| Upper | Suite 04, ensuite | 8 × 8 m, plus 3 × 8 m west loggia |
 | Upper | Primary, ensuite and separate dressing room | 13 × 9 m |
 | Upper | Suite 05, ensuite | 8 × 10 m |
-| Upper | Family lounge | 8 × 6.6 m |
+| Upper | Family lounge | 5.4 × 6.6 m, plus 2.6 × 7 m east loggia |
 
 [Ground plan](views/ground-plan.svg) · [Upper plan](views/upper-plan.svg) · [Site plan](views/site-plan.svg) · [Paired plans](views/floor-plans.png)
 
@@ -62,13 +72,18 @@ A broad return stair was selected instead of a curved stair: it fits beside the 
 
 Floor plates are a disjoint union of named footprint rectangles. Upper living and stair voids and the roof courtyard/terrace openings are subtracted explicitly. Rugs and bathroom finishes are thin decorative meshes, not extra walking surfaces. Social rooms, court thresholds and rear social terrace share the ground datum. Wall tops stop at slab undersides to avoid coplanar exposed faces. Doors and their collision rectangles animate together; front vestibule doors swing into their rooms to preserve the passage.
 
-The source uses shared wall/opening/door/slab components and plan-derived destinations. Balcony posts, portico piers and rooftop pavilion supports express structural intent. Wall thicknesses, slab spans, connections, foundations, lateral stability and the living-roof span require a structural engineer; the visualization is not a construction detail.
+The source uses shared wall/opening/door/slab/loggia components and plan-derived destinations. `ENVELOPE` holds the facade depths, loggia bounds, foyer opening and stair tower dimensions; `sideWalls` schedules the authored elevations. Balcony posts, portico piers and rooftop pavilion supports express structural intent. Wall thicknesses, slab spans, connections, foundations, lateral stability and the living-roof span require a structural engineer; the visualization is not a construction detail.
 
 ## Rendering diagnosis and verification scope
 
+For this exterior pass, matching front-left captures with shadows disabled removed the jagged bands. Disabling textures separately did not identify a new texture or slab-overlap cause. The retained 1024-pixel directional shadow map now uses fitted caster depth bounds, tighter projection padding, back-face casting, tuned depth/normal bias and medium PCF filtering. This reduces self-shadow artifacts without increasing map resolution, adding shadow sources or changing preset scaling. Fine shadow aliasing remains visible at some slab edges; the result is not an artifact-free offline render. The shadow-off comparisons are saved beside the before/after views.
+
+The new review set uses identical before/after camera positions, 0.8 radian vertical perspective field of view (about 46°), and orthographic full-side elevations. The front camera is 1.65 m high. Doors remain closed in the foyer comparison, so stair visibility does not depend on opening a hidden corridor door. The final plain-material capture checks massing without surface textures. [Exterior review and comparisons](EXTERIOR_REVIEW.md) records the actual views and verification limits.
+
+
 The earlier scene was compared in the actual browser with shadows disabled, then procedural textures disabled. Jagged shadow edges disappeared in the first comparison; repeated coursing/banding disappeared in the second. Separate code inspection found overlapping floor slabs and raised decorative finishes. The redesign removes the coursing pattern, gives box faces dimension-based texture coordinates, trims wall tops below slabs and creates nonoverlapping indoor plates. This addresses distinct causes rather than attributing every artifact to one source. Shadow aliasing and transparent-surface ordering remain possible in this lightweight renderer.
 
-The test suite checks the six-suite schedule, court and living voids, disjoint plates, every opened doorway, flat social route, all stair flights and landings in both directions, and connected routes to rooms, bathrooms, dressing room, pantry, balconies and rooftop. Actual browser inspection and interaction results are documented in the README and `views/browser-check.json`, separately from these programmatic checks.
+The test suite checks the six-suite schedule, court and living voids, disjoint plates, every opened doorway, flat social route, all stair flights and landings in both directions, side-loggia guards/support and privacy glazing, the door-free foyer-to-stair approach and sightline past wall colliders, and connected routes to rooms, bathrooms, dressing room, pantry, balconies and rooftop. Actual browser inspection and interaction results are documented in the README and `views/browser-check.json`, separately from these programmatic checks.
 
 ## Privacy, climate and later professional verification
 

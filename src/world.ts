@@ -13,6 +13,8 @@ import {ShadowGenerator} from '@babylonjs/core/Lights/Shadows/shadowGenerator';
 import {DynamicTexture} from '@babylonjs/core/Materials/Textures/dynamicTexture';
 import {rooms, SITE_SIDE, STOREY, LEVEL, ARCH, stairs, stairLandings, stairPoint, groundPlates, upperPlates, roofPlates, balconies, outline, roomRect, roomEntry, ensuiteRect, type Rect, type Room, type Obstacle, type Surface} from './plan';
 
+import {ENVELOPE,sideWalls} from './facades';
+
 export interface Door {name:string; pivot:TransformNode; leaf:Mesh; open:boolean; angle:number; target:number; x:number; y:number; z:number; width:number; along:'x'|'z'; swing:number; slide?:boolean}
 export interface LightZone {name:string;position:Vector3;on:boolean;light:PointLight;material:StandardMaterial;strips:Mesh[]}
 export interface World {obstacles:Obstacle[];surfaces:Surface[];doors:Door[];zones:LightZone[];sun:DirectionalLight;ambient:HemisphericLight;shadows:ShadowGenerator;setNight:(night:boolean)=>void;update:(dt:number,player:Vector3)=>void;meshCount:number}
@@ -22,7 +24,8 @@ export function createWorld(scene:Scene, headless=false):World {
  let night=false;
  const sun=new DirectionalLight('sun',new Vector3(-.45,-.85,.35),scene);sun.position.set(35,50,-35);sun.intensity=1.15;sun.diffuse=Color3.FromHexString('#fff0d9');
  const ambient=new HemisphericLight('sky',Vector3.Up(),scene);ambient.intensity=.58;ambient.groundColor=Color3.FromHexString('#a1a49c');
- const shadows=new ShadowGenerator(1024,sun);shadows.usePercentageCloserFiltering=true;shadows.filteringQuality=ShadowGenerator.QUALITY_LOW;shadows.bias=.003;shadows.normalBias=.08;shadows.setDarkness(.22);
+ // Fit depth and XY coverage to casters. Back faces suppress planar self-shadowing; PCF softens the retained 1024px map.
+ const shadows=new ShadowGenerator(1024,sun);shadows.usePercentageCloserFiltering=true;shadows.filteringQuality=ShadowGenerator.QUALITY_MEDIUM;shadows.forceBackFacesOnly=true;shadows.bias=.006;shadows.normalBias=.025;sun.autoCalcShadowZBounds=true;sun.shadowOrthoScale=.02;shadows.setDarkness(.22);
  scene.clearColor=Color4.FromHexString('#cbdde5ff');scene.fogMode=Scene.FOGMODE_EXP2;scene.fogDensity=.0028;scene.fogColor=Color3.FromHexString('#cbdde5');
  const mat=(name:string,hex:string,spec=.035)=>{const m=new StandardMaterial(name,scene);m.diffuseColor=Color3.FromHexString(hex);m.specularColor=new Color3(spec,spec,spec);m.specularPower=48;return m;};
  const plaster=mat('Warm limestone plaster','#e4e5e1'),stone=mat('Travertine','#8c8981'),dark=mat('Charcoal aluminium','#252c30'),wood=mat('Smoked oak','#775b40'),floor=mat('Honed limestone floor','#bcb9b0',.06),oak=mat('Natural oak floor','#a5835e'),grass=mat('Garden lawn','#627359'),asphalt=mat('Driveway basalt','#535957'),water=mat('Pool water','#52a6a4',.8),white=mat('Ivory upholstery','#eee8db'),cloth=mat('Sage upholstery','#818d7c'),black=mat('Cinema charcoal','#242626'),leaf=mat('Olive canopy','#354b32',.02),brass=mat('Brushed brass','#b6a170',.5),soil=mat('Planting earth','#615343');
@@ -45,13 +48,13 @@ export function createWorld(scene:Scene, headless=false):World {
  function cylinder(name:string,x:number,y:number,z:number,d:number,h:number,m:StandardMaterial,top=d){const b=MeshBuilder.CreateCylinder(name,{diameterBottom:d,diameterTop:top,height:h,tessellation:16},scene);b.position.set(x,y,z);b.material=m;b.isPickable=false;b.receiveShadows=true;return b;}
  function slab(name:string,x:number,z:number,w:number,d:number,y:number,m=floor){box(name,x,y-.12,z,w,.24,d,m,false,y>=STOREY);surfaces.push({name,x,z,w,d,y});}
  function panel(name:string,x:number,z:number,w:number,d:number,base:number,h=3.95,m=plaster){if(base+h<=LEVEL.roof+.001&&base+h>0&&Math.abs((base+h)/STOREY-Math.round((base+h)/STOREY))<.0001)h-=.24;return box(name,x,base+h/2,z,w,h,d,m,true,true);}
- function zone(name:string,x:number,y:number,z:number,w:number,d:number){
+ function zone(name:string,x:number,y:number,z:number,w:number,d:number,ceiling=true){
   const lm=mat(name+' LEDs','#fff1c8');lm.emissiveColor=Color3.FromHexString('#ffdc99');lm.disableLighting=true;
-  const strips=[box(name+' cove west',x-w/2+.32,y+3.72,z,.025,.018,d-.64,lm),box(name+' cove east',x+w/2-.32,y+3.72,z,.025,.018,d-.64,lm),box(name+' cove north',x,y+3.72,z+d/2-.32,w-.64,.018,.025,lm),box(name+' cove south',x,y+3.72,z-d/2+.32,w-.64,.018,.025,lm)];
+  const strips=ceiling?[box(name+' cove west',x-w/2+.32,y+3.72,z,.025,.018,d-.64,lm),box(name+' cove east',x+w/2-.32,y+3.72,z,.025,.018,d-.64,lm),box(name+' cove north',x,y+3.72,z+d/2-.32,w-.64,.018,.025,lm),box(name+' cove south',x,y+3.72,z-d/2+.32,w-.64,.018,.025,lm)]:[];
   const light=new PointLight(name,new Vector3(x,y+3.25,z),scene);light.diffuse=Color3.FromHexString('#ffdfaa');light.range=10;light.intensity=.35;
   const q={name,position:new Vector3(x,y+1,z),on:true,light,material:lm,strips};zones.push(q);
   // The ceiling recess leaves a dark reveal around the warm strip.
-  box(name+' floating ceiling',x,y+3.88,z,w-.9,.12,d-.9,plaster);
+  if(ceiling)box(name+' floating ceiling',x,y+3.88,z,w-.9,.12,d-.9,plaster);
   return q;
  }
  function door(name:string,x:number,y:number,z:number,width=1.3,along:'x'|'z'='z',material=wood,slide=false){
@@ -73,7 +76,7 @@ export function createWorld(scene:Scene, headless=false):World {
  }
  // A wall and its aperture share the same dimensions for rendering and collision.
  function wallOpening(name:string,x:number,z:number,length:number,along:'x'|'z',base:number,
-   opening:{offset:number;width:number;sill:number;head:number},material=plaster,glazed=true,thickness:number=ARCH.wall){
+   opening:{offset:number;width:number;sill:number;head:number},material=plaster,glazed=true,thickness:number=ARCH.wall,recess=0){
   const {offset,width,sill,head}=opening;
   const segment=(label:string,start:number,end:number,bottom:number,height:number,m=material)=>{
    if(end-start<.001||height<.001)return;
@@ -85,7 +88,7 @@ export function createWorld(scene:Scene, headless=false):World {
   segment('sill',offset-width/2,offset+width/2,0,sill);
   segment('head',offset-width/2,offset+width/2,head,STOREY-head);
   if(glazed){
-   const gx=x+(along==='x'?offset:0),gz=z+(along==='z'?offset:0);
+   const gx=x+(along==='x'?offset:recess),gz=z+(along==='z'?offset:recess);
    box(name+' recessed glass',gx,base+(sill+head)/2,gz,along==='x'?width:.035,head-sill,along==='z'?width:.035,glass,true);
    for(const t of [-width/2,width/2,0])box(name+' vertical frame',gx+(along==='x'?t:0),base+(sill+head)/2,gz+(along==='z'?t:0),.055,head-sill,.055,dark);
    for(const h of [sill,head])box(name+' horizontal frame',gx,base+h,gz,along==='x'?width:.06,.06,along==='z'?width:.06,dark);
@@ -103,7 +106,8 @@ export function createWorld(scene:Scene, headless=false):World {
   box('Bedroom rug',x,y+.02,z+1,4,.025,4.8,white);
   box('Bed plinth',x,y+.23,z,2.25,.4,2.6,wood);box('Linen mattress',x,y+.54,z,2.18,.3,2.55,white);box('Duvet',x,y+.74,z+.25,2.2,.13,1.9,cloth);box('Upholstered headboard',x,y+.83,z-1.37,2.8,1.55,.15,cloth);
   for(const a of [-1,1]){box('Pillow',x+a*.55,y+.78,z-.9,.85,.18,.48,white);box('Bedside cabinet',x+a*1.75,y+.36,z-1,.65,.7,.6,wood);cylinder('Bedside lamp',x+a*1.75,y+.95,z-1,.33,.4,white);}
-  if(!r.master)box('Wardrobe',r.x+Math.sign(r.x)*(r.width/2-.55),y+1.35,r.z-r.depth/2+1.65,.6,2.7,2.7,wood,true);
+  if(['suite-1','suite-4','suite-5'].includes(r.id))box('Wardrobe',r.x,y+1.35,r.z-r.depth/2+.55,2.7,2.7,.6,wood,true);
+  else if(!r.master)box('Wardrobe',r.x+Math.sign(r.x)*(r.width/2-.55),y+1.35,r.z-r.depth/2+1.65,.6,2.7,2.7,wood,true);
  }
  function bathroom(r:Room){const y=r.floor*STOREY,{x,z,w,d}=ensuiteRect(r);
   box('Ensuite applied finish',x,y+LEVEL.finish,z,w,.002,d,stone);
@@ -117,11 +121,11 @@ export function createWorld(scene:Scene, headless=false):World {
  }
  function furnish(r:Room){const y=r.floor*STOREY;
   if(r.kind==='bedroom'){bed(r);bathroom(r);}
-  if(r.kind==='office'){table(r.x,y,r.z,2.6,1.2);sofa(r.x,y,r.z+1.8);box('Bookshelf',r.x-3.4,y+1.4,r.z, .5,2.8,4,wood);for(let i=0;i<3;i++)box('Bookshelf shelf',r.x-3.1,y+.4+i*.8,r.z,.6,.05,3.8,dark);box('Desk monitor',r.x,y+1.2,r.z+.25,1,.65,.05,dark);}
-  if(r.kind==='gym'){for(let i=0;i<1;i++){box('Treadmill deck',r.x-.35+i*2.6,y+.15,r.z,1.1,.3,2.1,dark);box('Treadmill upright',r.x-.35+i*2.6,y+.8,r.z+.8,.1,1.3,.1,dark);box('Treadmill console',r.x-.35+i*2.6,y+1.4,r.z+.8,.75,.12,.35,black);}box('Exercise mat',r.x,y+.03,r.z+2.2,2,.04,1,cloth);box('Gym mirror',r.x+r.width/2-.15,y+1.7,r.z,.03,2.3,5,glass);}
+  if(r.kind==='office'){table(r.x,y,r.z,2.6,1.2);sofa(r.x,y,r.z+1.8);box('Bookshelf',r.x,y+1.4,r.z+2.65,4,2.8,.5,wood);for(let i=0;i<3;i++)box('Bookshelf shelf',r.x,y+.4+i*.8,r.z+2.35,3.8,.05,.6,dark);box('Desk monitor',r.x,y+1.2,r.z+.25,1,.65,.05,dark);}
+  if(r.kind==='gym'){for(let i=0;i<1;i++){box('Treadmill deck',r.x-.35+i*2.6,y+.15,r.z,1.1,.3,2.1,dark);box('Treadmill upright',r.x-.35+i*2.6,y+.8,r.z+.8,.1,1.3,.1,dark);box('Treadmill console',r.x-.35+i*2.6,y+1.4,r.z+.8,.75,.12,.35,black);}box('Exercise mat',r.x,y+.03,r.z+2.2,2,.04,1,cloth);box('Gym mirror',r.x,y+1.7,r.z-r.depth/2+.15,3,2.3,.03,glass);}
   if(r.kind==='cinema'){box('Cinema carpet',r.x,y+.02,r.z,r.width-.3,.03,r.depth-.3,black);box('Cinema screen frame',r.x+3.8,y+1.9,r.z,.12,2.7,5.2,dark);const screen=mat('Projection surface','#9aaeb3');screen.emissiveColor=new Color3(.13,.18,.2);box('Projection screen',r.x+3.72,y+1.9,r.z,.02,2.35,4.8,screen);sofa(r.x+.8,y,r.z+1,-Math.PI/2,black);sofa(r.x-1.8,y,r.z+1,-Math.PI/2,black);}
   if(r.kind==='kitchen'){box('Kitchen island',r.x,y+.5,r.z,4,1,1.6,wood,true);box('Island waterfall top',r.x,y+1.06,r.z,4.2,.12,1.8,white);for(const x of [r.x-2.04,r.x+2.04])box('Waterfall stone end',x,y+.53,r.z,.12,1.06,1.8,white);for(const x of [r.x-1.25,r.x,r.x+1.25]){cylinder('Island stool',x,y+.7,r.z-1.35,.48,.13,cloth);cylinder('Stool stem',x,y+.35,r.z-1.35,.055,.65,dark);}box('Island sink',r.x+.8,y+1.125,r.z,.7,.025,.55,dark);box('Kitchen cabinets',r.x+r.width/2-.5,y+.5,r.z,.8,1,6,wood,true);box('Kitchen counter',r.x+r.width/2-.55,y+1.06,r.z,.95,.12,6,white);box('Tall fridge',r.x+r.width/2-.6,y+1.3,r.z-2.7,1.1,2.6,1.2,dark,true);table(r.x,y,r.z+2.7,2.5,1.2);}
-  if(r.kind==='lounge'){sofa(r.x,y,r.z+1);sofa(r.x-2,y,r.z,-Math.PI/2);table(r.x,y-.3,r.z-1,1.8,1);}
+  if(r.kind==='lounge'){sofa(r.x,y,r.z+1);table(r.x,y-.3,r.z-1,1.8,1);}
   plant(r.x+Math.sign(r.x)*(r.width/2-1),y,r.z-r.depth/2+1,.85);
  }
  // One acre, laid out at true metre scale.
@@ -182,14 +186,53 @@ export function createWorld(scene:Scene, headless=false):World {
    if(r.id==='lounge'&&i===3){passage('Courtyard viewing alcove',f.x,f.z,f.n,f.axis,y,-1.75,1.2);continue;}
    const outer=(i===0&&r.x<0)||(i===1&&r.x>0),rear=i===3&&(r.id==='suite-2'||r.master||r.id==='suite-5');
    if(rear&&r.floor){glazedPassage(r.name+' balcony',f.x,f.z,f.n,f.axis,y,r.x<0?2:-2,2.2);continue;}
-   if(outer||rear){
+   if(outer)continue; // Authored as continuous elevations below, independently of rooms.
+   if(rear){
     wallOpening(r.name+' garden aperture',f.x,f.z,f.n,f.axis,y,{offset:outer?-.6:1.8,width:Math.min(f.n-2,r.kind==='cinema'?2:4.8),sill:r.kind==='cinema'?2.5:.85,head:3.5},plaster,true,.36);
    }else panel(r.name+' partition',f.x,f.z,f.axis==='x'?f.n:.24,f.axis==='z'?f.n:.24,y,STOREY);
   }
   zone(r.name,r.x,y,r.z,r.width,r.depth);furnish(r);
  }
+ // Deliberate elevation layer: no per-room automatic side windows.
+ for(const face of sideWalls){
+  const material=face.material==='stone'?stone:plaster;let cursor=face.from;
+  for(const opening of face.openings){
+   const lo=opening.at-opening.width/2,hi=opening.at+opening.width/2;
+   if(lo>cursor)panel(face.name+' solid',face.x,(cursor+lo)/2,ENVELOPE.wallDepth,lo-cursor,face.level,STOREY,material);
+   wallOpening(face.name+' recess',face.x,opening.at,opening.width,'z',face.level,{offset:0,width:opening.width,sill:opening.sill,head:opening.head},material,!opening.door,ENVELOPE.wallDepth,face.inset);
+   if(opening.door){
+    const gx=face.x+face.inset;
+    door(opening.door,gx,face.level,lo,opening.width,'z',glass,true);
+    panel(face.name+' door transom',gx,opening.at,.06,opening.width,face.level+2.7,opening.head-2.7,glass);
+    for(const z of [lo,hi])box(face.name+' door jamb',gx,face.level+opening.head/2,z,.055,opening.head,.055,dark);
+    for(const h of [2.7,opening.head])box(face.name+' door rail',gx,face.level+h,opening.at,.055,.055,opening.width,dark);
+   }
+   cursor=hi;
+  }
+  if(cursor<face.to)panel(face.name+' solid',face.x,(cursor+face.to)/2,ENVELOPE.wallDepth,face.to-cursor,face.level,STOREY,material);
+ }
+ // Occupied recesses retain the existing slab; room envelopes move inward to form useful terraces.
+ const west=ENVELOPE.westLoggia,east=ENVELOPE.eastLoggia;
+ function loggia(name:string,r:Rect,outside:number,inside:number,material:StandardMaterial){
+  const roofEdge=LEVEL.roof-.22,soffit=roofEdge-ENVELOPE.edgeDepth/2-.01;
+  panel(name+' privacy parapet',outside,r.z,.35,r.d,LEVEL.upper,ENVELOPE.guard,material);
+  for(const z of [r.z-r.d/2,r.z+r.d/2])panel(name+' supporting pier',outside,z,.5,.5,0,LEVEL.roof,material);
+  box(name+' deep roof edge',outside+Math.sign(inside-outside)*.35,roofEdge,r.z,.9,ENVELOPE.edgeDepth,r.d,plaster,true,true);
+  box(name+' protected oak soffit',r.x,soffit,r.z,r.w-.4,.025,r.d-.5,wood);
+  zone(name,r.x,LEVEL.upper,r.z,r.w,r.d,false);
+  box(name+' warm wall wash',inside+Math.sign(outside-inside)*.3,soffit-.025,r.z,.025,.025,r.d-1,exterior);
+ }
+ loggia('West loggia',west,west.x-west.w/2,west.x+west.w/2,stone);
+ loggia('East loggia',east,east.x+east.w/2,east.x-east.w/2,plaster);
+ panel('East loggia front return',east.x,east.z-east.d/2,east.w,.35,LEVEL.upper,ENVELOPE.guard,plaster);
+ panel('East loggia north cheek',east.x,east.z+east.d/2,east.w,.35,LEVEL.upper,STOREY,stone);
+ // Base planes and upper soffits turn the major front corners.
+ box('West loggia corner soffit',-12.7,8.13,-3.9,.6,.025,2,wood);
  // Private bedroom corridor is screened from living; access is off the foyer and dining circulation.
- passage('Private wing',0,-2,6,'z',0,0,1.5);
+ const portal=ENVELOPE.foyerPortal;
+ wallOpening('Open stair portal',portal.x,portal.z,portal.length,'z',LEVEL.ground,{offset:0,width:portal.width,sill:0,head:portal.head},stone,false,.36);
+ // Privacy begins beyond the stair: the foyer can see the flights without a corridor door.
+ passage('Bedroom hall privacy',-1,2.7,2,'x',0,0,1.4,wood,true);
  for(const f of [0,1]){
   panel('Living media spine',0,6,.3,10,f*STOREY,STOREY,stone);
   passage(f?'Upper private gallery':'Garden private hall',0,15.5,9,'z',f*STOREY,f?-3.3:-1.4,1.5);
@@ -197,7 +240,7 @@ export function createWorld(scene:Scene, headless=false):World {
  }
  // Enclosed kitchen and pantry, with the whole west edge open to dining.
  wallOpening('Kitchen garden glazing',13,20,8,'x',0,{offset:-1.4,width:4,sill:.1,head:3.5},plaster,true,.32);
- wallOpening('Kitchen east wall',17,15,10,'z',0,{offset:-2,width:3.2,sill:1.35,head:3.5},plaster,true,.32);
+
  const pantry=ARCH.pantry;
  panel('Pantry side',pantry.x-pantry.w/2,pantry.z,.16,pantry.d,0,3.8);
  panel('Pantry back',pantry.x,pantry.z+pantry.d/2,pantry.w,.16,0,3.8);
@@ -250,20 +293,22 @@ export function createWorld(scene:Scene, headless=false):World {
  panel('East living void guard',9,3,.055,4,STOREY,1.1,glass);
  sofa(3,STOREY,13.05,0);table(5.4,STOREY-.35,12.7,1.2,.7);zone('Living overlook gallery',4.5,STOREY,12.5,8.6,2.6);
  glazedPassage('Upper garden terrace',4.5,14,9,'x',STOREY,1.3,2.4);
- wallOpening('Upper east enclosed link',17,7,6,'z',STOREY,{offset:0,width:3.5,sill:1.1,head:3.5},plaster,true,.32);
+
  panel('Front recess guard',4.5,-5,9,.18,STOREY,1.1,stone);
  panel('Front recess east guard',9,-4,.18,2,STOREY,1.1,stone);
  // Front and rear exterior closures deliberately differ: private street / generous garden.
  passage('Front entrance',4.5,-5,9,'x',0,-1.5,2.4,wood);
+ box('Entrance oak reveal',3,3.32,-4.76,3.3,1,.08,wood);
+ for(const x of [1.35,4.65])box('Entrance deep jamb',x,1.9,-4.96,.25,3.8,.5,stone,true,true);
  wallOpening('Upper recessed gallery',4.5,-3,9,'x',STOREY,{offset:1,width:4.8,sill:.35,head:3.7},plaster,true,.35);
  for(const f of [0,1]){
   if(!f)wallOpening('West vestibule street wall',-9.5,-5,7,'x',0,{offset:1.2,width:1.8,sill:1.6,head:3.4},stone,true,.4);
   else{panel('Sheltered upper loggia guard',-9.5,-5,7,.16,STOREY,1.1,stone);box('Loggia oak soffit',-9.5,8.13,-4,7,.025,1.75,wood);box('Loggia concealed strip',-9.5,8.1,-3.2,6.4,.025,.025,exterior);}
   // The stair bay uses a single narrow vertical daylight slot, not repeated punched windows.
   wallOpening('Stair street blade',-3,-5,6,'x',f*STOREY,{offset:-1.4,width:.75,sill:.2,head:4.05},stone,true,.45);
-  panel('Vestibule west end',-13,-4,.3,2,f*STOREY,f?1.1:STOREY);
+  if(f)panel('Vestibule west end',-13,-4,.3,2,STOREY,1.1,stone);
   // Quiet front of the east wing, recessed behind the main portico.
-  wallOpening('East street wall',13,-3,8,'x',f*STOREY,{offset:1.5,width:f?3.4:2.4,sill:f?1.2:2.4,head:3.6},plaster,true,.4);
+  wallOpening('East street wall',f?11.7:13,-3,f?5.4:8,'x',f*STOREY,{offset:f?0:1.5,width:2.4,sill:f?1.2:2.4,head:3.6},f?plaster:stone,true,ENVELOPE.wallDepth,ENVELOPE.reveal);
  }
  glazedPassage('Rear garden doors',4.5,20,9,'x',0,2,2.4);
  slab('Rear social terrace',4.5,22,9,4,LEVEL.ground,stone);
@@ -289,23 +334,26 @@ export function createWorld(scene:Scene, headless=false):World {
   if(y===LEVEL.roof)panel('Stair arrival front guard',-5.1,-3.6,1.8,.05,y,1.1,glass);
  }
  // Three coherent massing gestures: deep arrival frame, vertical stone stair blade, recessed upper wings.
- panel('Arrival frame west pier',-.45,-5.05,.65,3.4,0,8.9,plaster);
- panel('Arrival frame east pier',9.45,-5.05,.7,3.4,0,8.9,plaster);
- box('Arrival frame deep head',4.5,8.7,-5.05,10.6,.7,3.4,plaster,true,true);
- box('Portico oak soffit',4.5,8.335,-5.05,9.5,.035,3.15,wood);
- box('Portico concealed light',4.5,8.3,-3.55,9.1,.035,.04,exterior);
+ panel('Arrival frame west pier',-.45,-5.05,.7,3.4,0,9.5,plaster);
+ panel('Arrival frame east pier',9.45,-5.05,.7,3.4,0,9.5,plaster);
+ box('Arrival frame deep head',4.5,8.83,-5.05,10.6,1.34,3.4,plaster,true,true);
+ box('Portico oak soffit',4.5,8.14,-5.05,9.5,.035,3.15,wood);
+ box('Portico concealed light',4.5,8.11,-3.55,9.1,.035,.04,exterior);
  // The lower entrance shelter is a recessed occupied volume, integrated with the upper gallery slab.
- box('Entrance shelter beam',4.5,4.03,-5.5,9.4,.34,1.1,stone,true,true);
- box('Entrance warm soffit',4.5,3.845,-4.7,8.8,.025,1.9,wood);
- for(const x of [1,7.8])box('Entrance lighting seam',x,3.82,-4.65,.035,.025,1.8,exterior);
- zone('Arrival shelter',3,-.5,-5.5,5,2);
+ box('Entrance shelter beam',4.5,3.925,-5.45,9.4,.55,1.3,plaster,true,true);
+ box('Entrance warm soffit',4.5,3.63,-4.7,8.8,.025,1.9,wood);
+ for(const x of [1,7.8])box('Entrance lighting seam',x,3.6,-4.65,.035,.025,1.8,exterior);
+ // Recessed downlights share the room-light control and the four-light budget.
+ zone('Arrival shelter',3,.3,-4.3,3,1,false);
  // A single tall solid blade, aligned to the stair wall, anchors the entrance composition.
- panel('Stone stair volume',-5.8,-5.8,.55,1,0,9.35,stone);
+ panel('Stone stair volume',-5.8,-5.8,.6,1,0,ENVELOPE.towerTop,stone);
  // Sheltered balconies and carved rear terrace, each with actual supporting posts.
  for(const b of balconies){
-  for(const x of [b.x-b.w/2,b.x+b.w/2]){panel('Balcony support',x,b.z+b.d/2,.28,.28,0,8.4,plaster);panel('Balcony side guard',x,b.z,.06,b.d,STOREY,1.1,glass);}
+  for(const x of [b.x-b.w/2,b.x+b.w/2]){panel('Balcony support',x,b.z+b.d/2,.45,.45,0,8.4,plaster);panel('Balcony side guard',x,b.z,.06,b.d,STOREY,1.1,glass);}
   panel('Balcony front guard',b.x,b.z+b.d/2,b.w,.06,STOREY,1.1,glass);
-  box('Balcony deep roof edge',b.x,8.3,b.z,b.w,.4,b.d,plaster,true,true);sofa(b.x,STOREY,b.z,Math.PI);
+  box('Balcony deep roof edge',b.x,8.22,b.z,b.w,.55,b.d,plaster,true,true);
+  box('Balcony oak soffit',b.x,7.935,b.z,b.w-.65,.025,b.d-.35,wood);
+  box('Balcony concealed rear light',b.x,7.9,b.z-b.d/2+.24,b.w-.9,.025,.025,exterior);sofa(b.x,STOREY,b.z,Math.PI);
  }
  panel('Upper garden terrace guard',4.5,20,9,.06,STOREY,1.1,glass);
  for(const x of [0,9])panel('Garden terrace side',x,17,.06,6,STOREY,1.1,glass);
@@ -318,9 +366,16 @@ export function createWorld(scene:Scene, headless=false):World {
   const court=e.x>=8.99&&e.x<=13.51&&e.z>=4.99&&e.z<=10.01;
   panel('Roof perimeter guard',e.x,e.z,e.w,e.d,LEVEL.roof,1.1,court||e.z>=13.99?glass:plaster);
  }
- // Modest rooftop stair pavilion; access is from the front landing, not through a guard.
- box('Roof stair pavilion lid',-4,11.2,-.7,4.4,.25,8.1,plaster,true,true);
- for(const x of [-6,-2])for(const z of [-4.6,3.1])panel('Roof stair pavilion post',x,z,.16,.16,LEVEL.roof,2.8,dark);
+ // Stone stair enclosure grows from the arrival blade; glazed east exit opens onto the roof.
+ const tower=ENVELOPE.stairTower,towerHeight=ENVELOPE.towerTop-LEVEL.roof;
+ box('Stair tower roof',tower.x,ENVELOPE.towerTop+.13,tower.z,tower.w,.26,tower.d,plaster,true,true);
+ panel('Stair tower west',tower.x-tower.w/2,tower.z,.32,tower.d,LEVEL.roof,towerHeight,stone);
+ panel('Stair tower front',tower.x,tower.z-tower.d/2,tower.w,.32,LEVEL.roof,towerHeight,stone);
+ panel('Stair tower rear',tower.x,tower.z+tower.d/2,tower.w,.18,LEVEL.roof,towerHeight,glass);
+ door('Rooftop stair enclosure',-1.8,LEVEL.roof,-4.6,1.4,'z',glass,true);
+ panel('Tower exit header',-1.8,-3.9,.18,1.4,LEVEL.roof+2.7,towerHeight-2.7,stone);
+ panel('Tower east front jamb',-1.8,-4.95,.18,.7,LEVEL.roof,towerHeight,stone);
+ panel('Tower east glazing',-1.8,0,.06,6.4,LEVEL.roof,towerHeight,glass);
  for(const x of [10,16])for(const z of [12,18])panel('Rooftop pergola post',x,z,.12,.12,LEVEL.roof,2.6,dark);
  for(let z=12;z<=18;z+=.45)box('Pergola slat',13,11,z,6.2,.15,.09,wood,true,true);
  sofa(13,LEVEL.roof,16);table(13,LEVEL.roof-.35,14.5,2,1);

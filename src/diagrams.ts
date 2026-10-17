@@ -1,4 +1,5 @@
 import {rooms,roomRect,ensuiteRect,ARCH,STOREY,SITE_SIDE,balconies,stairs,groundPlates,upperPlates,bounds,type Rect} from './plan';
+import {ENVELOPE,sideWalls} from './facades';
 const rect=(r:Rect,fill:string,stroke='#918d83',width=.1)=>`<rect x="${r.x-r.w/2}" y="${-r.z-r.d/2}" width="${r.w}" height="${r.d}" fill="${fill}" stroke="${stroke}" stroke-width="${width}"/>`;
 const label=(x:number,z:number,text:string,size=.6,color='#343d37')=>`<text x="${x}" y="${-z}" text-anchor="middle" font-family="system-ui,sans-serif" font-size="${size}" fill="${color}">${text}</text>`;
 const opening=(x:number,z:number,width:number,along:'x'|'z')=>`<path d="M ${x} ${-z} ${along==='x'?'h':'v'} ${along==='x'?width:-width}" stroke="#f4f1e9" stroke-width=".3"/>`;
@@ -15,7 +16,7 @@ export function floorPlanSvg(floor:number){
   if(r.id==='lounge')parts.push(opening(10.65,3.6,1.2,'x'));
  }
  parts.push(rect(ARCH.courtyard,'#b7c5a4'),label(11.25,8,'FAMILY COURT',.42),label(11.25,7,'4.5 × 5 m',.42));
- if(floor){parts.push(rect(ARCH.livingVoid,'#cfdddd'),label(4.5,6,'DOUBLE-HEIGHT VOID',.6),label(4.5,12,'FURNISHED OVERLOOK',.48),rect(ARCH.wardrobe,'#cbbda2'),label(ARCH.wardrobe.x,ARCH.wardrobe.z,'WALK-IN CLOSET',.42),rect(ARCH.rearTerrace,'#d3c3a5'),label(4.5,17,'RECESSED GARDEN TERRACE',.44));for(const b of balconies)parts.push(rect(b,'#d3c3a5'),label(b.x,b.z,'BALCONY',.45));}
+ if(floor){for(const [name,r] of [['WEST LOGGIA',ENVELOPE.westLoggia],['EAST LOGGIA',ENVELOPE.eastLoggia]] as const)parts.push(rect(r,'#d3c3a5'),label(r.x,r.z,name,.28));for(const face of sideWalls)for(const o of face.openings)if(o.door)parts.push(opening(face.x,o.at-o.width/2,o.width,'z'));parts.push(rect(ARCH.livingVoid,'#cfdddd'),label(4.5,6,'DOUBLE-HEIGHT VOID',.6),label(4.5,12,'FURNISHED OVERLOOK',.48),rect(ARCH.wardrobe,'#cbbda2'),label(ARCH.wardrobe.x,ARCH.wardrobe.z,'WALK-IN CLOSET',.42),rect(ARCH.rearTerrace,'#d3c3a5'),label(4.5,17,'RECESSED GARDEN TERRACE',.44));for(const b of balconies)parts.push(rect(b,'#d3c3a5'),label(b.x,b.z,'BALCONY',.45));}
  else{
   parts.push(label(4.5,6,'DOUBLE-HEIGHT LIVING',.57),label(4.5,15.5,'DINING',.65),label(4.5,-2,'FOYER',.55),rect(ARCH.pantry,'#cfc6b4'),label(ARCH.pantry.x,ARCH.pantry.z,'PANTRY',.42),rect(ARCH.powder,'#dae5e3'),label(ARCH.powder.x,ARCH.powder.z,'WC',.4));
   parts.push(`<path d="M 3 5 L 3 -2 L 6.5 -2 L 6.5 -18 M 6.5 -11.3 H 12" fill="none" stroke="#986e3e" stroke-width=".12" stroke-dasharray=".3 .2"/>`);
@@ -23,7 +24,7 @@ export function floorPlanSvg(floor:number){
  // Major partitions and openings clarify the protected private hall and open social plan.
  parts.push(rect(bounds(-.12,.12,floor?1:-5,20),'#918d83','#918d83',0),opening(0,floor?11.45:13.35,1.5,'z'));
  if(floor){parts.push(opening(-7,12.15,1.3,'z'),opening(4.6,14,2.4,'x'),label(11.25,4.25,'COURT ALCOVE',.25));for(const b of balconies)parts.push(opening(b.x+(b.x<0?2:-2)-1.1,20,2.2,'x'));}
- else parts.push(opening(0,-2.75,1.5,'z'),opening(14.35,16.5,1.2,'x'),opening(-9.5,-4.55,1.1,'z'),opening(9,5.7,1.6,'z'),opening(10,10,1.6,'x'),opening(1.8,-5,2.4,'x'),opening(5.3,20,2.4,'x'));
+ else parts.push(opening(ENVELOPE.foyerPortal.x,ENVELOPE.foyerPortal.z-ENVELOPE.foyerPortal.width/2,ENVELOPE.foyerPortal.width,'z'),rect(bounds(-2,0,2.58,2.82),'#918d83','#918d83',0),opening(-1.7,2.7,1.4,'x'),opening(14.35,16.5,1.2,'x'),opening(-9.5,-4.55,1.1,'z'),opening(9,5.7,1.6,'z'),opening(10,10,1.6,'x'),opening(1.8,-5,2.4,'x'),opening(5.3,20,2.4,'x'));
  for(const s of stairs.filter(s=>s.level===0)){
   parts.push(rect(s,'#c2bfb5'));
   for(let i=1;i<s.steps;i++)parts.push(`<path d="M ${s.x-s.w/2} ${-(s.z-s.d/2+i*s.d/s.steps)} h ${s.w}" stroke="#827c71" stroke-width=".06"/>`);
