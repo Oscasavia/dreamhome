@@ -1,0 +1,73 @@
+{
+  "doors": [
+    "Vehicle gate",
+    "Pedestrian gate",
+    "Arrival study",
+    "Garden suite 01",
+    "Garden suite 01 bathroom",
+    "Garden suite 02",
+    "Garden suite 02 bathroom",
+    "Wellness studio",
+    "Private cinema",
+    "Kitchen & breakfast",
+    "Bedroom suite 03",
+    "Bedroom suite 03 bathroom",
+    "Primary suite balcony",
+    "Primary suite",
+    "Primary suite bathroom",
+    "Upper lounge loggia",
+    "Recessed upper lounge",
+    "Bedroom suite 04",
+    "Bedroom suite 04 bathroom",
+    "Bedroom suite 05 balcony",
+    "Bedroom suite 05",
+    "Bedroom suite 05 bathroom",
+    "Primary walk-in closet",
+    "Front entrance",
+    "Front entrance right",
+    "Pool terrace door",
+    "Guest half bathroom",
+    "Garage bay 1",
+    "Garage bay 2",
+    "Garage bay 3"
+  ],
+  "stairs": [
+    {
+      "floor": 0,
+      "up": [
+        4.7095200000286095,
+        4.2,
+        1
+      ],
+      "down": [
+        -4.708560000085828,
+        0,
+        1
+      ]
+    },
+    {
+      "floor": 1,
+      "up": [
+        4.71096000008583,
+        8.4,
+        4
+      ],
+      "down": [
+        -4.709520000028608,
+        4.2,
+        4
+      ]
+    }
+  ],
+  "controls": [
+    "third-person camera",
+    "first-person camera",
+    "day/night keyboard presets",
+    "nearest-zone lighting",
+    "low quality",
+    "balanced quality",
+    "high quality",
+    "floor plan tabs"
+  ],
+  "errors": []
+}
