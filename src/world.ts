@@ -13,8 +13,9 @@ import {ShadowGenerator} from '@babylonjs/core/Lights/Shadows/shadowGenerator';
 import {surfaceTexture} from './surfaceTextures';
 import {createLandscape} from './landscape';
 import {socialMaterials,furnishSocial} from './interior';
+import {buildStairs} from './stairs';
 import {SOCIAL} from './interiorPlan';
-import {rooms, SITE_SIDE, STOREY, LEVEL, ARCH, SITE, stairs, approachStairs, disjoint, stairLandings, stairPoint, groundPlates, upperPlates, roofPlates, balconies, outline, roomRect, roomEntry, ensuiteRect, type Rect, type Room, type Obstacle, type Surface} from './plan';
+import {rooms, SITE_SIDE, STOREY, LEVEL, ARCH, SITE, MAIN_STAIR, stairs, approachStairs, disjoint, stairLandings, stairPoint, groundPlates, upperPlates, roofPlates, balconies, outline, roomRect, roomEntry, ensuiteRect, type Rect, type Room, type Obstacle, type Surface} from './plan';
 
 import {ENVELOPE,FRONT,sideWalls} from './facades';
 
@@ -36,6 +37,7 @@ export function createWorld(scene:Scene, headless=false):World {
  water.alpha=.85;water.specularPower=128;
  const entryWood=mat('Dark walnut entry doors','#30251b');
  const glass=mat('Smoked architectural glazing','#9eb9b5',.65);glass.alpha=.25;glass.backFaceCulling=false;
+ const stairGlass=mat('Clear stair and gallery glass','#d9e9e6',.25);stairGlass.alpha=.14;stairGlass.backFaceCulling=false;
  if(!headless){
   for(const [m,kind] of [[stone,'travertine'],[floor,'floor'],[oak,'wood'],[wood,'wood'],[grass,'grass'],[asphalt,'paver']] as const)surfaceTexture(scene,m,kind);
  }
@@ -150,7 +152,7 @@ export function createWorld(scene:Scene, headless=false):World {
  for(const r of SOCIAL.floorAreas)plate('Continuous social porcelain floor',r,LEVEL.ground,interior.porcelain);
  for(const [level,plates] of [[1,upperPlates],[2,roofPlates]] as const)for(const r of plates)plate('Continuous floor '+level,r,level*STOREY,level===2?stone:floor);
  for(const e of outline(groundPlates)){const atSteps=Math.abs(e.z+8)<.001&&e.x>.5&&e.x<9;box('Raised house plinth',e.x,grade/2,e.z,e.w,-grade,e.d,stone,!atSteps,true);}
- for(const landing of stairLandings)plate('Return stair landing',landing,landing.y,stone);
+ for(const landing of stairLandings)plate('Return stair landing',landing,landing.y,landing.level===0?interior.marble:stone);
  // Wall faces use one opening component for walls, windows and working doors.
  function passage(name:string,x:number,z:number,length:number,along:'x'|'z',base:number,offset:number,width=1.4,m=wood,sliding=false){
   wallOpening(name+' surround',x,z,length,along,base,{offset,width,sill:0,head:2.8},plaster,false);
@@ -284,13 +286,13 @@ export function createWorld(scene:Scene, headless=false):World {
  // A side gallery connects the front landing to a guarded rear overlook.
  const voidRect=ARCH.livingVoid;
  for(const z of [voidRect.z-voidRect.d/2,voidRect.z+voidRect.d/2]){
-  panel('Living overlook guard',voidRect.x,z,voidRect.w,.055,STOREY,1.1,glass);
-  box('Overlook rail cap',voidRect.x,STOREY+1.1,z,voidRect.w,.045,.065,dark);
+  const edges=z===MAIN_STAIR.startZ?[[0,MAIN_STAIR.upperX-.95],[MAIN_STAIR.upperX+.95,voidRect.w]]:[[0,voidRect.w]];
+  for(const [a,b] of edges){panel('Living overlook guard',(a+b)/2,z,b-a,.055,STOREY,1.1,stairGlass);box('Overlook rail cap',(a+b)/2,STOREY+1.1,z,b-a,.045,.065,dark,true);}
  }
  const galleryEdge=voidRect.x+voidRect.w/2;
- panel('East living void guard',galleryEdge,voidRect.z,.055,voidRect.d,STOREY,1.1,glass);
- box('East overlook rail cap',galleryEdge,STOREY+1.1,voidRect.z,.065,.045,voidRect.d,dark);
- sofa(2,STOREY,-.8,0);
+ panel('East living void guard',galleryEdge,voidRect.z,.055,voidRect.d,STOREY,1.1,stairGlass);
+ box('East overlook rail cap',galleryEdge,STOREY+1.1,voidRect.z,.065,.045,voidRect.d,dark,true);
+ sofa(7.4,STOREY,-1.6,0);
  zone('Living overlook gallery',ARCH.overlook.x,STOREY,ARCH.overlook.z,8.6,1.6);
  glazedPassage('Upper garden terrace',4.5,ARCH.rearTerrace.z-ARCH.rearTerrace.d/2,9,'x',STOREY,1.3,2.4);
 
@@ -365,27 +367,16 @@ export function createWorld(scene:Scene, headless=false):World {
   box(index?'Garden access tread':'Veranda approach tread',p.x,(top+grade)/2,p.z,s.w,top-grade,s.d/s.steps,stone,false,true);
   if(!index)box('Concealed step-edge light',p.x,top-.035,front-s.direction*.012,s.w-.18,.025,.025,exterior);
  }
- // Sculptural return stair: four real flights, two intermediate landings, no unrelated ramps.
- for(const s of stairs){
-  for(let i=0;i<s.steps;i++){
-   const t=(i+.5)/s.steps,p=stairPoint(s,t),h=s.base+(i+1)/s.steps*s.rise;
-   box('Return stair tread',p.x,h-.075,p.z,s.w,.15,s.d/s.steps,stone,false,true);
-   box('Return stair riser',p.x,h-s.rise/s.steps/2,p.z-s.direction*s.d/s.steps/2,s.w,s.rise/s.steps,.035,stone);
-  }
-  for(const side of [-1,1]){
-   const stringer=box('Stair structural stringer',s.x+side*(s.w/2-.14),s.base+s.rise/2-.25,s.z,.12,.22,Math.hypot(s.d,s.rise),dark,false,true);stringer.rotation.x=-s.direction*Math.atan2(s.rise,s.d);
-   const x=s.x+side*(s.w/2+.025),rail=box('Continuous stair handrail',x,s.base+s.rise/2+1,s.z,.065,.065,Math.hypot(s.d,s.rise),dark);
-   rail.rotation.x=-s.direction*Math.atan2(s.rise,s.d);
-   for(let i=0;i<24;i++){const t=(i+.5)/24,p=stairPoint(s,t);box('Stair vertical baluster',x,p.y+.5,p.z,.025,1,.025,dark);obstacles.push({name:'Stair sloping guard',x,z:p.z,w:.04,d:s.d/24,bottom:p.y,top:p.y+1.05});}
-  }
- }
- for(const l of stairLandings){panel('Stair landing north guard',-4,2.4,3.9,.06,l.y,1.1,glass);for(const x of [-5.95,-2.05])panel('Stair landing side guard',x,1.5,.06,1.8,l.y,1.1,glass);}
- for(const y of [STOREY,STOREY*2]){
-  for(const x of [-5.95,-2.05])panel('Stair floor edge guard',x,-.6,.05,6,y,1.1,glass);
-  panel('Stair floor north guard',-4,2.4,3.9,.05,y,1.1,glass);
-  // Front landing opens only to the arriving (east) flight; west flight opening is guarded.
-  if(y===LEVEL.roof)panel('Stair arrival front guard',-5.1,-3.6,1.8,.05,y,1.1,glass);
- }
+ // Main stair occupies the front living void; only the roof stair remains in the former bay.
+ buildStairs({scene,obstacles,box,cylinder,panel,zone,castShadow:mesh=>shadows.addShadowCaster(mesh)},interior.marble,dark,glass,stairGlass);
+ // Redundant ground stair bay becomes a level cloak lobby beneath the restored upper slab.
+ box('Cloak lobby cabinetry',-5.5,1.35,.4,.65,2.7,3,wood,true,true);
+ box('Cloak lobby bench',-3.3,.45,2.35,1.8,.9,.55,wood,true);
+ box('Cloak lobby upholstered seat',-3.3,.93,2.35,1.8,.08,.55,cloth);
+ zone('Cloak lobby',-4,0,-.5,3.5,6,false);
+ for(const x of [-5.95,-2.05])panel('Roof stair floor edge guard',x,-.6,.05,6,LEVEL.roof,1.1,glass);
+ panel('Roof stair floor north guard',-4,2.4,3.9,.05,LEVEL.roof,1.1,glass);
+ panel('Roof stair arrival front guard',-5.1,-3.6,1.8,.05,LEVEL.roof,1.1,glass);
  // Sheltered balconies and carved rear terrace, each with actual supporting posts.
  for(const b of balconies){
   for(const x of [b.x-b.w/2,b.x+b.w/2]){panel('Balcony support',x,b.z+b.d/2,.45,.45,0,8.4,plaster);panel('Balcony side guard',x,b.z,.06,b.d,STOREY,1.1,glass);}

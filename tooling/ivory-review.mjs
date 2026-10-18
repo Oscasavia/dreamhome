@@ -25,7 +25,7 @@ const views=[
  ['living-overlook',[4.5,5.85,17],[2.8,2.4,11.5]],
  ['top',[0,65,0],[0,0,.01],true,.95,52],
  ['veranda',[4.8,1.3,-12],[5.2,2,-4]],
- ['foyer-stair',[3,1.65,-2.2],[-3,2,-1.5]]
+ ['foyer-stair',[5.5,1.65,-3],[2.7,2.4,3.2]]
 ];
 const aim=async(eye,target,ortho=false,fov=.95,span=19)=>ev(`__dreamhome.showDesignView('arrival');{const c=__dreamhome.overview;c.mode=${ortho?1:0};c.fov=${fov};c.orthoLeft=-${span};c.orthoRight=${span};c.orthoTop=${span/1.5};c.orthoBottom=-${span/1.5};c.setTarget(c.target.set(${target.join(',')}));c.setPosition(c.position.clone().set(${eye.join(',')}));}`);
 const capture=async name=>{await pause(600);const shot=await call('Page.captureScreenshot',{format:'png'});await writeFile(`${directory}/${name}.png`,Buffer.from(shot.data,'base64'));};

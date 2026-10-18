@@ -4,7 +4,8 @@ import {NullEngine} from '@babylonjs/core/Engines/nullEngine';
 import {Scene} from '@babylonjs/core/scene';
 import {Vector3} from '@babylonjs/core/Maths/math.vector';
 import {createWorld} from '../src/world';
-import {rooms,roomRect,ensuiteRect,SITE_SIDE,ACRE_M2,STOREY,LEVEL,ARCH,SITE,approachStairs,groundPlates,upperPlates,roofPlates,stairs,stairPoint,groundHeight,blocked,destinations} from '../src/plan';
+import {rooms,roomRect,ensuiteRect,SITE_SIDE,ACRE_M2,STOREY,LEVEL,ARCH,SITE,approachStairs,groundPlates,upperPlates,roofPlates,stairs,mainStairs,roofStairs,stairLandings,MAIN_STAIR,stairPoint,groundHeight,blocked,destinations} from '../src/plan';
+import {FURNITURE,furnitureRoute,furnitureHits,clearanceSolids} from '../src/stairClearance';
 import {SOCIAL,diningSeats,islandSeats,occupiedSeat} from '../src/interiorPlan';
 import {ENVELOPE,sideWalls} from '../src/facades';
 function fixture(){const engine=new NullEngine(),scene=new Scene(engine),world=createWorld(scene,true);return {world,scene,done(){scene.dispose();engine.dispose();}};}
@@ -19,7 +20,7 @@ test('floor plates never overlap; indoor finished elevations and true voids are 
  for(const plates of [groundPlates,upperPlates,roofPlates])for(let i=0;i<plates.length;i++)for(let j=i+1;j<plates.length;j++){
   const a=plates[i],b=plates[j];const x=Math.min(a.x+a.w/2,b.x+b.w/2)-Math.max(a.x-a.w/2,b.x-b.w/2),z=Math.min(a.z+a.d/2,b.z+b.d/2)-Math.max(a.z-a.d/2,b.z-b.d/2);assert.ok(x<1e-6||z<1e-6,'no coplanar floor overlap');
  }
- const f=fixture(),w=f.world;assert.equal(groundHeight(4,6,STOREY,w.surfaces),0);assert.equal(groundHeight(11,7,LEVEL.roof,w.surfaces),0);assert.equal(groundHeight(4,17,STOREY,w.surfaces),STOREY);
+ const f=fixture(),w=f.world;assert.equal(groundHeight(4,10,STOREY,w.surfaces),0);assert.equal(groundHeight(11,7,LEVEL.roof,w.surfaces),0);assert.equal(groundHeight(4,17,STOREY,w.surfaces),STOREY);
  assert.equal(blocked(4,16,STOREY,w.obstacles),true);assert.equal(w.surfaces.some(s=>s.name?.includes('finish')),false);
  assert.ok(f.scene.meshes.length<1500);f.done();
 });
@@ -45,7 +46,7 @@ test('return stair flights and intermediate landings connect all three levels in
  for(const s of stairs){let y=s.base;for(let i=0;i<=120;i++){const p=stairPoint(s,i/120);assert.equal(blocked(p.x,p.z,y,w.obstacles),false,'stair ascent '+JSON.stringify(p));y=groundHeight(p.x,p.z,y,w.surfaces);}assert.ok(Math.abs(y-(s.base+s.rise))<.02);
   for(let i=120;i>=0;i--){const p=stairPoint(s,i/120);assert.equal(blocked(p.x,p.z,y,w.obstacles),false,'stair descent');y=groundHeight(p.x,p.z,y,w.surfaces);}assert.ok(Math.abs(y-s.base)<.02);
  }
- for(const s of stairs.filter(s=>s.direction===1)){for(let x=-5.1;x<=-2.9;x+=.05){assert.equal(blocked(x,1.5,s.base+s.rise,w.obstacles),false);assert.equal(groundHeight(x,1.5,s.base+s.rise,w.surfaces),s.base+s.rise);}}
+ for(const l of stairLandings){const pair=stairs.filter(s=>s.level===l.level);for(let x=pair[0].x;x<=pair[1].x;x+=.05){assert.equal(blocked(x,l.z,l.y,w.obstacles),false,'landing turn');assert.equal(groundHeight(x,l.z,l.y,w.surfaces),l.y);}}
  f.done();
 });
 test('all destinations, private rooms, baths, closet, pantry, galleries and terraces are connected',()=>{
@@ -53,7 +54,7 @@ test('all destinations, private rooms, baths, closet, pantry, galleries and terr
  const step=.25,minX=-15,minZ=-7,nx=137,nz=129;
  for(const level of [0,1,2]){
   const y=level*STOREY,seen=new Set<number>(),queue:number[]=[],cell=(x:number,z:number)=>Math.round((z-minZ)/step)*nx+Math.round((x-minX)/step);
-  const seed=level===0?cell(3,-3.5):cell(-2.9,-4.3);queue.push(seed);seen.add(seed);
+  const seed=level===0?cell(3,-3.5):level===1?cell(MAIN_STAIR.upperX,-.4):cell(-2.9,-4.3);queue.push(seed);seen.add(seed);
   for(let i=0;i<queue.length;i++){const id=queue[i],ix=id%nx,iz=Math.floor(id/nx);for(const [dx,dz] of [[1,0],[-1,0],[0,1],[0,-1]]){const ax=ix+dx,az=iz+dz,k=az*nx+ax;if(ax<0||az<0||ax>=nx||az>=nz||seen.has(k))continue;const x=minX+ax*step,z=minZ+az*step;if(Math.abs(groundHeight(x,z,y,w.surfaces)-y)>.01||blocked(x,z,y,w.obstacles))continue;seen.add(k);queue.push(k);}}
   const reach=(x:number,z:number,name:string)=>assert.ok(seen.has(cell(x,z)),`${name} disconnected at ${x},${z}, floor ${level}`);
   for(const r of rooms.filter(r=>r.floor===level)){const e=r.entry;reach(e.x+(e.along==='x'?e.width/2:Math.sign(r.x)*.6),e.z+(e.along==='z'?e.width/2:.6),r.name);if(r.ensuite){const b=ensuiteRect(r);reach(b.x-.25,b.z-.8,r.name+' bath');}}
@@ -84,10 +85,17 @@ test('foyer opens directly to the stair while a separate door protects the bedro
  const f=fixture(),w=f.world;
  assert.equal(w.doors.some(d=>d.name==='Private wing'),false);assert.ok(w.doors.some(d=>d.name==='Bedroom hall privacy'));
  // The arrival route needs no private-hall door operation.
- const route=[[3,-2.1],[-1.5,-2.1],[-1.5,-4.3],[-5.1,-4.3]];
+ const route=SOCIAL.routes.stairApproach;
  for(let i=1;i<route.length;i++){const a=route[i-1],b=route[i],n=Math.ceil(Math.hypot(b[0]-a[0],b[1]-a[1])/.05);for(let k=0;k<=n;k++){const x=a[0]+(b[0]-a[0])*k/n,z=a[1]+(b[1]-a[1])*k/n;assert.equal(blocked(x,z,0,w.obstacles),false,`foyer to stair ${x},${z}`);assert.equal(groundHeight(x,z,0,w.surfaces),0);}}
- // A sight line from standing eye height to the lower treads crosses no wall collider; stair guard rectangles represent spaced balusters.
- for(let t=0;t<=1;t+=.01){const x=3+(-5.1-3)*t,z=-2.2+(-1.8+2.2)*t,y=LEVEL.eye+(.9-LEVEL.eye)*t;assert.equal(w.obstacles.some(o=>o.name!=='Stair sloping guard'&&x>o.x-o.w/2&&x<o.x+o.w/2&&z>o.z-o.d/2&&z<o.z+o.d/2&&y>o.bottom&&y<o.top),false,'stair sightline');}
+ assert.ok(MAIN_STAIR.approach.w>=2.5&&MAIN_STAIR.approach.d>=2.5);
+ assert.equal(w.obstacles.some(o=>/^Arrival (lounge chair|chair|round|sitting)/.test(o.name)),false);
+ assert.equal(groundHeight(-4,1,LEVEL.upper,w.surfaces),LEVEL.upper,'old upper opening filled');
+ assert.equal(groundHeight(-5.1,-1.5,0,w.surfaces),0,'old ground ramp removed');
+ assert.equal(blocked(MAIN_STAIR.upperX,1,LEVEL.upper,w.obstacles),false,'guard opens only at upper arrival');
+ assert.equal(blocked(MAIN_STAIR.lowerX,1,LEVEL.upper,w.obstacles),true,'remaining front void edge guarded');
+ assert.equal(blocked(MAIN_STAIR.landing.x,MAIN_STAIR.landing.z,0,w.obstacles),true,'no low-headroom shortcut beneath landing');
+ for(const x of [.5,5.2])assert.equal(blocked(x,1,LEVEL.upper,w.obstacles),true,'front void protected');
+
  f.done();
 });
 
@@ -125,10 +133,28 @@ test('social layout keeps occupied seating, working aisle and genuine ceiling-he
  // Standing near the island sees the table and living furniture without a partition.
  for(const target of [[8.3,14.25],[4.7,12.3]])for(let t=0;t<=1;t+=.01){const x=11+(target[0]-11)*t,z=16+(target[1]-16)*t;assert.equal(w.obstacles.some(o=>x>o.x-o.w/2&&x<o.x+o.w/2&&z>o.z-o.d/2&&z<o.z+o.d/2&&o.bottom<LEVEL.eye&&o.top>LEVEL.eye),false,'island social sightline');}
  assert.equal(SOCIAL.ceiling,LEVEL.roof-LEVEL.slabThickness);
- for(const z of [3,8,12,15])assert.equal(groundHeight(3,z,LEVEL.upper,w.surfaces),0,'extended genuine living void');
+ for(const z of [9,10,12,15])assert.equal(groundHeight(3,z,LEVEL.upper,w.surfaces),0,'extended genuine living void');
  for(const z of [3,8,12,15]){assert.equal(blocked(6.5,z,LEVEL.upper,w.obstacles),true,'side void guard');assert.equal(groundHeight(7.7,z,LEVEL.upper,w.surfaces),LEVEL.upper,'gallery support');}
  assert.ok(SOCIAL.chandelier.lowest>3&&SOCIAL.chandelier.lowest>SOCIAL.media.tvCentre+SOCIAL.media.tvHeight/2);
  assert.ok(SOCIAL.chandelier.x+SOCIAL.chandelier.width/2<ARCH.livingVoid.x+ARCH.livingVoid.w/2-.8);
  w.setNight(true);w.update(.05,new Vector3(5.9,0,12));assert.ok(w.zones.filter(z=>z.light.isEnabled()).length<=4);
+ f.done();
+});
+
+
+test('rigid furniture proxy clears approach, both flights, a full landing turn and upper bedroom circulation',()=>{
+ const f=fixture();openAll(f.world);const route=furnitureRoute(),solids=clearanceSolids(f.world.obstacles);
+ assert.deepEqual([FURNITURE.length,FURNITURE.width,FURNITURE.height],[2.2,1,.9]);
+ assert.ok(2*MAIN_STAIR.railOffset-MAIN_STAIR.railThickness>=1.8);
+ assert.ok(route.some(p=>p.stage==='Rigid 180 degree turn'&&p.yaw>1&&p.yaw<2));
+ for(const p of route){const hit=solids.find(o=>furnitureHits(p,o));assert.equal(hit,undefined,JSON.stringify({stage:p.stage,position:[p.x,p.y,p.z],yaw:p.yaw,pitch:p.pitch,hit:hit?.name}));}
+ // SAT must detect a known obstruction, including a rotated long box against an offset narrow post.
+ assert.ok(furnitureHits({...route[0],yaw:Math.PI/4},{name:'Deliberate obstruction',x:route[0].x+.5,z:route[0].z+.5,w:.1,d:.1,bottom:route[0].y-.2,top:route[0].y+.2}));
+ const walking=[{x:MAIN_STAIR.lowerX,y:0,z:-.4},{x:MAIN_STAIR.upperX,y:LEVEL.upper,z:-.4},{...MAIN_STAIR.landing,y:STOREY/2},...mainStairs.flatMap(s=>Array.from({length:101},(_,i)=>stairPoint(s,i/100)))];
+ for(const p of walking){
+  const overhead=solids.filter(o=>Math.abs(p.x-o.x)<o.w/2+.23&&Math.abs(p.z-o.z)<o.d/2+.23&&o.bottom>p.y+.22);
+  assert.ok(overhead.every(o=>o.bottom-p.y>=2.1),`standing headroom ${p.x},${p.y},${p.z}`);
+ }
+ assert.ok(roofStairs.every(s=>s.x<0&&s.level===1));assert.ok(mainStairs.every(s=>s.x>0&&s.level===0));
  f.done();
 });

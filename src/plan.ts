@@ -43,15 +43,26 @@ export const ensuiteRect=(r:Room):Rect=>({x:r.x+Math.sign(r.x)*(r.width/2-1.7),z
 export const balconies=[bounds(-15,-2,20,23),bounds(9,17,20,22.8)];
 export const galleries=[ARCH.privateHall,ARCH.frontGallery,ARCH.eastGallery,ARCH.overlook];
 export interface Stair extends Rect {base:number;rise:number;direction:1|-1;steps:number;level:number}
-export const stairs:Stair[]=[0,1].flatMap(level=>[
- {x:-5.1,z:-1.5,w:1.6,d:4.2,base:level*STOREY,rise:STOREY/2,direction:1 as const,steps:12,level},
- {x:-2.9,z:-1.5,w:1.6,d:4.2,base:level*STOREY+STOREY/2,rise:STOREY/2,direction:-1 as const,steps:12,level}
-]);
+export const MAIN_STAIR={
+ lowerX:1.55,upperX:3.85,startZ:1,run:4.2,treadWidth:2,clearWidth:1.8,
+ railThickness:.05,railOffset:.925,guardHeight:1.1,treadThickness:.12,
+ approach:bounds(.3,2.8,-1.5,1),arrival:bounds(2.6,5.1,-1.5,1),
+ landing:bounds(.55,4.85,5.2,8),
+} as const;
+export const mainStairs:Stair[]=[
+ {x:MAIN_STAIR.lowerX,z:MAIN_STAIR.startZ+MAIN_STAIR.run/2,w:MAIN_STAIR.treadWidth,d:MAIN_STAIR.run,base:LEVEL.ground,rise:STOREY/2,direction:1,steps:12,level:0},
+ {x:MAIN_STAIR.upperX,z:MAIN_STAIR.startZ+MAIN_STAIR.run/2,w:MAIN_STAIR.treadWidth,d:MAIN_STAIR.run,base:STOREY/2,rise:STOREY/2,direction:-1,steps:12,level:0},
+];
+export const roofStairs:Stair[]=[
+ {x:-5.1,z:-1.5,w:1.6,d:4.2,base:LEVEL.upper,rise:STOREY/2,direction:1,steps:12,level:1},
+ {x:-2.9,z:-1.5,w:1.6,d:4.2,base:LEVEL.upper+STOREY/2,rise:STOREY/2,direction:-1,steps:12,level:1},
+];
+export const stairs:Stair[]=[...mainStairs,...roofStairs];
 export const approachStairs:Stair[]=[
  {x:4.8,z:-9.2,w:8.2,d:2.4,base:LEVEL.site,rise:-LEVEL.site,direction:1,steps:5,level:-1},
  {x:6.5,z:24.9,w:3.8,d:1.8,base:LEVEL.site,rise:-LEVEL.site,direction:-1,steps:5,level:-1},
 ];
-export const stairLandings=[0,1].map(level=>({...bounds(-5.95,-2.05,.6,2.4),y:level*STOREY+STOREY/2}));
+export const stairLandings=[{...MAIN_STAIR.landing,y:STOREY/2,level:0},{...bounds(-5.95,-2.05,.6,2.4),y:LEVEL.upper+STOREY/2,level:1}];
 export const stairPoint=(s:Stair,t:number)=>({x:s.x,z:s.z+s.direction*(t-.5)*s.d,y:s.base+t*s.rise});
 export const inside=(x:number,z:number,r:Rect,margin=0)=>Math.abs(x-r.x)<r.w/2+margin&&Math.abs(z-r.z)<r.d/2+margin;
 export function subtractRects(base:Rect,cuts:Rect[]):Rect[]{
@@ -65,7 +76,7 @@ export function subtractRects(base:Rect,cuts:Rect[]):Rect[]{
 export function disjoint(rects:Rect[],cuts:Rect[]=[]):Rect[]{const out:Rect[]=[];for(const r of rects)out.push(...subtractRects(r,[...out,...cuts]));return out;}
 const footprint=[...rooms.filter(r=>!r.floor).map(roomRect),bounds(-13,0,-5,-3),ARCH.privateHall,ARCH.stairBay,ARCH.foyer,ARCH.living,ARCH.dining,bounds(9,13.5,4,5)];
 export const groundPlates=disjoint([...footprint,SITE.leftVestibule,SITE.veranda]);
-export const upperPlates=disjoint([...footprint,...balconies,SITE.leftVestibule,SITE.frontBalcony],[ARCH.livingVoid,ARCH.stairOpening]);
+export const upperPlates=disjoint([...footprint,...balconies,SITE.leftVestibule,SITE.frontBalcony],[ARCH.livingVoid]);
 export const roofPlates=disjoint([...footprint,SITE.leftVestibule,SITE.veranda],[ARCH.stairOpening,ARCH.rearTerrace]);
 export function outline(rects:Rect[]):Rect[]{
  const xs=[...new Set(rects.flatMap(r=>[r.x-r.w/2,r.x+r.w/2]))].sort((a,b)=>a-b),zs=[...new Set(rects.flatMap(r=>[r.z-r.d/2,r.z+r.d/2]))].sort((a,b)=>a-b),out:Rect[]=[];
@@ -80,6 +91,7 @@ export const destinations=[
  {id:'foyer',name:'Entrance foyer',x:5.5,y:LEVEL.ground,z:-3.5,yaw:0},
  {id:'living',name:'Living / dining / kitchen',x:5.9,y:LEVEL.ground,z:3,yaw:0},
  {id:'courtyard',name:'Family courtyard',x:9.75,y:LEVEL.ground,z:7,yaw:0},
+ {id:'stair',name:'Main stair approach',x:MAIN_STAIR.lowerX,y:LEVEL.ground,z:-.5,yaw:0},
  {id:'upper',name:'Living overlook',x:4.5,y:LEVEL.upper,z:17,yaw:Math.PI},
  {id:'primary',name:'Primary private hall',x:-1,y:LEVEL.upper,z:13,yaw:-Math.PI/2},
  {id:'entrance-balcony',name:'Entrance balcony',x:5.5,y:LEVEL.upper,z:-5.7,yaw:Math.PI},
@@ -89,9 +101,9 @@ export const destinations=[
  {id:'pool',name:'Pool & gazebo',x:6.5,y:LEVEL.site,z:25,yaw:-Math.PI/2},
  {id:'garage',name:'West-facing three-car garage',x:17,y:LEVEL.site,z:-16,yaw:Math.PI/2}
 ];
-export interface Obstacle extends Rect {bottom:number;top:number;active?:()=>boolean;name:string}
+export interface Obstacle extends Rect {bottom:number;top:number;active?:()=>boolean;name:string;stairStructure?:boolean}
 export interface Surface extends Rect {y:number;name?:string}
-export function blocked(x:number,z:number,feet:number,obstacles:Obstacle[],radius=.23){return obstacles.some(o=>(!o.active||o.active())&&feet+1.72>o.bottom+.04&&feet<o.top-.08&&inside(x,z,o,radius));}
+export function blocked(x:number,z:number,feet:number,obstacles:Obstacle[],radius=.23){return obstacles.some(o=>(!o.active||o.active())&&feet+(o.stairStructure?2.1:1.72)>o.bottom+.04&&feet<o.top-(o.stairStructure?.36:.08)&&inside(x,z,o,radius));}
 export function groundHeight(x:number,z:number,current:number,surfaces:Surface[]){
  let best=LEVEL.site as number;
  for(const s of surfaces)if(inside(x,z,s,.001)&&s.y<=current+.22)best=Math.max(best,s.y);

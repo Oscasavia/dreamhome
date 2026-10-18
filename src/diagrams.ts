@@ -1,4 +1,4 @@
-import {SITE,LEVEL,approachStairs,rooms,roomRect,ensuiteRect,ARCH,STOREY,SITE_SIDE,balconies,stairs,groundPlates,upperPlates,bounds,type Rect} from './plan';
+import {SITE,LEVEL,approachStairs,rooms,roomRect,ensuiteRect,ARCH,STOREY,SITE_SIDE,balconies,stairs,stairLandings,MAIN_STAIR,groundPlates,upperPlates,bounds,type Rect} from './plan';
 import {SOCIAL,diningSeats,islandSeats,seatPosition} from './interiorPlan';
 import {ENVELOPE,sideWalls} from './facades';
 const rect=(r:Rect,fill:string,stroke='#918d83',width=.1)=>`<rect x="${r.x-r.w/2}" y="${-r.z-r.d/2}" width="${r.w}" height="${r.d}" fill="${fill}" stroke="${stroke}" stroke-width="${width}"/>`;
@@ -17,27 +17,29 @@ export function floorPlanSvg(floor:number){
   if(r.id==='lounge')parts.push(opening(10.65,3.6,1.2,'x'));
  }
  parts.push(rect(ARCH.courtyard,'#b7c5a4'),label(11.25,8,'FAMILY COURT',.42),label(11.25,7,'4.5 × 5 m',.42));
- if(floor){for(const [name,r] of [['WEST LOGGIA',ENVELOPE.westLoggia],['EAST LOGGIA',ENVELOPE.eastLoggia]] as const)parts.push(rect(r,'#d3c3a5'),label(r.x,r.z,name,.28));for(const face of sideWalls)for(const o of face.openings)if(o.door)parts.push(opening(face.x,o.at-o.width/2,o.width,'z'));parts.push(rect(ARCH.livingVoid,'#cfdddd'),label(3.25,8,'DOUBLE-HEIGHT',.45),label(3.25,7.2,'LIVING VOID',.45),label(4.5,17,'REAR OVERLOOK',.4),label(7.7,8,'GALLERY',.3),rect(ARCH.wardrobe,'#cbbda2'),label(ARCH.wardrobe.x,ARCH.wardrobe.z,'WALK-IN CLOSET',.42),rect(ARCH.rearTerrace,'#d3c3a5'),label(4.5,19,'GARDEN TERRACE',.4));for(const b of balconies)parts.push(rect(b,'#d3c3a5'),label(b.x,b.z,'BALCONY',.45));}
+ if(floor){for(const [name,r] of [['WEST LOGGIA',ENVELOPE.westLoggia],['EAST LOGGIA',ENVELOPE.eastLoggia]] as const)parts.push(rect(r,'#d3c3a5'),label(r.x,r.z,name,.28));for(const face of sideWalls)for(const o of face.openings)if(o.door)parts.push(opening(face.x,o.at-o.width/2,o.width,'z'));parts.push(rect(ARCH.livingVoid,'#cfdddd'),label(3.25,9.2,'DOUBLE-HEIGHT',.45),label(3.25,8.5,'LIVING VOID',.45),label(4.5,17,'REAR OVERLOOK',.4),label(7.7,8,'GALLERY',.3),rect(ARCH.wardrobe,'#cbbda2'),label(ARCH.wardrobe.x,ARCH.wardrobe.z,'WALK-IN CLOSET',.42),rect(ARCH.rearTerrace,'#d3c3a5'),label(4.5,19,'GARDEN TERRACE',.4));for(const b of balconies)parts.push(rect(b,'#d3c3a5'),label(b.x,b.z,'BALCONY',.45));}
  else{
-  parts.push(label(3.25,7,'DOUBLE-HEIGHT LIVING',.45),label(SOCIAL.dining.x,18.8,'DINING',.45),label(4.5,-2,'FOYER',.55),rect(ARCH.pantry,'#cfc6b4'),label(ARCH.pantry.x,ARCH.pantry.z,'PANTRY',.42),rect(ARCH.powder,'#dae5e3'),label(ARCH.powder.x,ARCH.powder.z,'WC',.4));
-  for(const [r,fill] of [[SOCIAL.reading,'#d4cbb8'],[SOCIAL.rug,'#d4cbb8'],[SOCIAL.sofa,'#eee9df'],[SOCIAL.chaise,'#eee9df'],[SOCIAL.coffee,'#9b8062'],[SOCIAL.dining,'#9b8062'],[SOCIAL.island,'#f5f2eb']] as const)parts.push(rect(r,fill));
-  for(const x of [SOCIAL.reading.x-.95,SOCIAL.reading.x+.95])parts.push(rect({x,z:SOCIAL.reading.z-.3,w:.95,d:1.1},'#eee9df'));
+  parts.push(label(3.25,8.7,'DOUBLE-HEIGHT LIVING',.4),label(SOCIAL.dining.x,18.8,'DINING',.45),label(4.5,-2,'FOYER',.55),rect(ARCH.pantry,'#cfc6b4'),label(ARCH.pantry.x,ARCH.pantry.z,'PANTRY',.42),rect(ARCH.powder,'#dae5e3'),label(ARCH.powder.x,ARCH.powder.z,'WC',.4));
+  for(const [r,fill] of [[SOCIAL.rug,'#d4cbb8'],[SOCIAL.sofa,'#eee9df'],[SOCIAL.chaise,'#eee9df'],[SOCIAL.coffee,'#9b8062'],[SOCIAL.dining,'#9b8062'],[SOCIAL.island,'#f5f2eb']] as const)parts.push(rect(r,fill));
   for(const seat of [...diningSeats,...islandSeats]){const p=seatPosition(seat);parts.push(rect({...p,w:.55,d:.55},'#b2a58f'));}
   parts.push(rect({x:.25,z:SOCIAL.media.z,w:.3,d:SOCIAL.media.width},'#a69781'),label(SOCIAL.island.x,SOCIAL.island.z,'4.4 m',.32));
-  for(const name of ['arrival','kitchen','garden','court'])parts.push(`<polyline points="${SOCIAL.routes[name].map(([x,z])=>`${x},${-z}`).join(' ')}" fill="none" stroke="#986e3e" stroke-width=".1" stroke-dasharray=".3 .2"/>`);
+  for(const name of ['arrival','stairApproach','kitchen','garden','court'])parts.push(`<polyline points="${SOCIAL.routes[name].map(([x,z])=>`${x},${-z}`).join(' ')}" fill="none" stroke="#986e3e" stroke-width=".1" stroke-dasharray=".3 .2"/>`);
  }
+ if(!floor)parts.push(rect(MAIN_STAIR.approach,'none','#986e3e',.05),label(MAIN_STAIR.approach.x,-.6,'2.5 m APPROACH',.28));
+ else parts.push(rect(MAIN_STAIR.arrival,'none','#986e3e',.05),label(MAIN_STAIR.arrival.x,-.6,'UPPER ARRIVAL',.28));
  // Major partitions and openings clarify the protected private hall and open social plan.
  parts.push(rect(bounds(-.12,.12,floor?1:-5,20),'#918d83','#918d83',0),opening(0,floor?16.35:16.55,1.5,'z'));
  if(floor){parts.push(opening(-7,12.15,1.3,'z'),opening(4.6,18,2.4,'x'),label(11.25,4.25,'COURT ALCOVE',.25));for(const b of balconies)parts.push(opening(b.x+(b.x<0?2:-2)-1.1,20,2.2,'x'));}
  else parts.push(opening(ENVELOPE.foyerPortal.x,ENVELOPE.foyerPortal.z-ENVELOPE.foyerPortal.width/2,ENVELOPE.foyerPortal.width,'z'),rect(bounds(-2,0,2.58,2.82),'#918d83','#918d83',0),opening(-1.7,2.7,1.4,'x'),opening(14.35,16.5,1.2,'x'),opening(-9.5,-4.55,1.1,'z'),opening(9,5.7,1.6,'z'),opening(10,10,1.6,'x'),opening(SITE.entrance.x-SITE.entrance.width/2,SITE.entrance.z,SITE.entrance.width,'x'),opening(5.3,20,2.4,'x'));
  if(!floor){const s=approachStairs[0];parts.push(rect(SITE.veranda,'#d3c3a5'),rect(s,'#d3c3a5'));for(let i=1;i<s.steps;i++)parts.push(`<path d="M ${s.x-s.w/2} ${-(s.z-s.d/2+i*s.d/s.steps)} h ${s.w}" stroke="#827c71" stroke-width=".06"/>`);}
  else {for(const r of [SITE.frontBalcony,SITE.leftBalcony])parts.push(rect(r,'#d3c3a5'),label(r.x,r.z,'BALCONY',.4));parts.push(opening(4.2,-3,2.6,'x'),opening(-8,-3,1.4,'x'));}
- for(const s of stairs.filter(s=>s.level===0)){
+ for(const l of stairLandings.filter(l=>floor||l.level===0))parts.push(rect(l,'#d3cbb8'));
+ for(const s of stairs.filter(s=>floor||s.level===0)){
   parts.push(rect(s,'#c2bfb5'));
   for(let i=1;i<s.steps;i++)parts.push(`<path d="M ${s.x-s.w/2} ${-(s.z-s.d/2+i*s.d/s.steps)} h ${s.w}" stroke="#827c71" stroke-width=".06"/>`);
   parts.push(label(s.x,s.z,s.direction===1?'↑':'↓',.75));
  }
- parts.push(label(-4,-4.6,floor?'STAIR / ROOF ACCESS':'RETURN STAIR',.36),label(-1,8,'PRIVATE',.3),label(-1,7.2,'HALL',.3));
+ parts.push(label(MAIN_STAIR.landing.x,MAIN_STAIR.landing.z,'MAIN STAIR',.36),label(-4,-1,floor?'ROOF STAIR':'CLOAK LOBBY',.36),label(-1,8,'PRIVATE',.3),label(-1,7.2,'HALL',.3));
  parts.push(label(2,25,'PROTECTED REAR GARDEN',.6),label(3,-11.5,floor?'INSET FRONT BALCONIES':'RAISED VERANDA · FIVE SHALLOW STEPS',.45),label(2,-12.5,`${floor?'UPPER':'GROUND'} · ${(floor*STOREY).toFixed(1)} m`,.7));
  parts.push(`<path d="M -13 -24 h 5 m -5 -.2 v .4 m 5 -.4 v .4" stroke="#343d37" stroke-width=".1"/>`,label(-10.5,23,'5 m',.4),'</svg>');return parts.join('');
 }

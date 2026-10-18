@@ -125,20 +125,6 @@ export function furnishSocial(c:Context,m:Materials){
  box('Coffee table recessed pedestal',coffee.x,.16,coffee.z,.8,.28,1.5,m.walnut);
  box('Coffee table book',coffee.x,.405,coffee.z-.5,.5,.05,.36,m.ceiling);
  cylinder('Coffee table ceramic bowl',coffee.x,.42,coffee.z+.5,.38,.12,m.taupe,.5);
- // An arrival sitting pair gives the front of the tall volume an everyday use, clear of the court route.
- const reading=SOCIAL.reading;
- box('Arrival sitting rug',reading.x,LEVEL.finish+.006,reading.z,reading.w,.012,reading.d,m.rug);
- for(const x of [reading.x-.95,reading.x+.95]){
-  const z=reading.z-.3;obstacle('Arrival lounge chair',x,z,.95,1.1,.95);
-  soft('Arrival chair walnut plinth',x,.18,z,.85,.25,.95,.06,m.walnut);
-  soft('Arrival chair upholstered base',x,.35,z,.95,.24,1.1,.08,m.cream);
-  soft('Arrival chair cushion',x,.5,z+.07,.75,.2,.82,.08,m.cream);
-  soft('Arrival chair back',x,.74,z-.43,.95,.52,.22,.08,m.taupe);
-  for(const side of [-1,1])soft('Arrival chair arm',x+side*.41,.63,z,.14,.3,1.05,.06,m.cream);
- }
- obstacle('Arrival round table',reading.x,reading.z+.75,.7,.7,.46);
- cylinder('Arrival round walnut table',reading.x,.43,reading.z+.75,.7,.06,m.walnut);
- cylinder('Arrival table pedestal',reading.x,.21,reading.z+.75,.24,.42,m.bronze);
  // The table and island run parallel, with dining physically between island and living seating.
  const table=SOCIAL.dining;
  obstacle('Dining table',table.x,table.z,table.w,table.d,table.height);

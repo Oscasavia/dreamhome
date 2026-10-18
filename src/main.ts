@@ -60,13 +60,13 @@ document.querySelectorAll<HTMLButtonElement>('[data-plan]').forEach(b=>b.onclick
 const designViews:Record<string,{eye:number[];target:number[];ortho?:boolean;fov?:number}>= {
  approved:{eye:[-4,7.5,-37],target:[4.5,2.4,-4],fov:.95},siteTop:{eye:[0,62,0],target:[0,0,.01],ortho:true},
  front:{eye:[4.8,.9,-29],target:[3.5,3.4,-3],fov:1.05},frontLeft:{eye:[-21,2,-26],target:[0,4.2,5],fov:.8},frontRight:{eye:[28,7,-24],target:[1,4.2,5],fov:.8},
- west:{eye:[-24,5.5,8],target:[-5,5.5,8],ortho:true},east:{eye:[24,5.5,8],target:[5,5.5,8],ortho:true},foyerStair:{eye:[3,1.65,-2.2],target:[-3,2,-1.5],fov:.8},
+ west:{eye:[-24,5.5,8],target:[-5,5.5,8],ortho:true},east:{eye:[24,5.5,8],target:[5,5.5,8],ortho:true},foyerStair:{eye:[5.5,1.65,-3],target:[2.7,2.4,3.2],fov:1.05},
  arrival:{eye:[-14,1.65,-21],target:[1,3,0]},rear:{eye:[-24,1.65,30],target:[1,3.4,19]},
  court:{eye:[9.8,1.65,9.1],target:[11.6,1.2,6.5]},courtSky:{eye:[10.2,5.85,4.25],target:[11.25,1,7.5]},aerial:{eye:[-34,43,-35],target:[2,0,5]},
  social:{eye:[12.7,1.65,19.5],target:[8.8,1.5,12.5],fov:1.3},foyer:{eye:[5.5,1.65,-2.5],target:[4,3,11]},
  media:{eye:[6,1.65,3.5],target:[.5,4.1,11.5],fov:1.2},island:{eye:[10.6,1.65,10.7],target:[13.5,1.1,14.2],fov:1.1},
- overlook:{eye:[4.5,5.85,17],target:[2.8,2.4,11.5]},stair:{eye:[-2.8,5.85,-4.5],target:[-4.6,2.5,1]},
- stairLower:{eye:[-5.1,3.75,1.5],target:[-2.9,4,-3.5]},stairRoof:{eye:[-2.8,10.05,-4.5],target:[-4.6,6.7,1]},roof:{eye:[-1,10.05,-3.7],target:[9,9.2,9]}
+ overlook:{eye:[4.5,5.85,17],target:[2.8,2.4,11.5]},stair:{eye:[5.6,5.85,-1.8],target:[2.5,3.1,4],fov:1.05},
+ stairLower:{eye:[1.55,3.75,6.6],target:[3.85,4.5,.1],fov:1.05},stairRoof:{eye:[-2.8,10.05,-4.5],target:[-4.6,6.7,1]},roof:{eye:[-1,10.05,-3.7],target:[9,9.2,9]}
 
 };
 function showDesignView(id:string){
@@ -80,6 +80,7 @@ function showDesignView(id:string){
 $<HTMLSelectElement>('designView').onchange=e=>showDesignView((e.target as HTMLSelectElement).value);
 // Development-only review bridge for reproducible browser inspection; absent from production.
 if(import.meta.env.DEV)Object.assign(window,{__dreamhome:{world,scene,player,camera,overview,go,showDesignView,setTime,setQuality,
+ face:(heading:number,tilt=0)=>{yaw=heading;pitch=tilt;},
  place:(x:number,y:number,z:number,heading=0,tilt=0)=>{player.set(x,y,z);yaw=heading;pitch=tilt;enter(false);},
  status:()=>({third,night,quality,started,position:player.asArray(),meshes:scene.meshes.length})}});
 $('enter').onclick=()=>enter();$('explore').onclick=toggleMap;$('map').onclick=toggleMap;$('time').onclick=()=>setTime(!night);$('camera').onclick=setCamera;$('interact').onclick=interact;$('lights').onclick=lights;
