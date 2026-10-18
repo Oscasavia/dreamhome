@@ -14,8 +14,10 @@ import {surfaceTexture} from './surfaceTextures';
 import {createLandscape} from './landscape';
 import {socialMaterials,furnishSocial} from './interior';
 import {buildStairs} from './stairs';
+import {BATH,bathrooms,bathForSuite,bathShower,bedroomFurniture} from './bathroomPlan';
+import {bathroomMaterials,buildBathrooms} from './bathrooms';
 import {SOCIAL} from './interiorPlan';
-import {rooms, SITE_SIDE, STOREY, LEVEL, ARCH, SITE, MAIN_STAIR, stairs, approachStairs, disjoint, stairLandings, stairPoint, groundPlates, upperPlates, roofPlates, balconies, outline, roomRect, roomEntry, ensuiteRect, type Rect, type Room, type Obstacle, type Surface} from './plan';
+import {rooms, SITE_SIDE, STOREY, LEVEL, ARCH, SITE, MAIN_STAIR, stairs, approachStairs, disjoint, stairLandings, stairPoint, groundPlates, upperPlates, roofPlates, balconies, outline, roomRect, roomEntry, type Rect, type Room, type Obstacle, type Surface} from './plan';
 
 import {ENVELOPE,FRONT,sideWalls} from './facades';
 
@@ -33,7 +35,7 @@ export function createWorld(scene:Scene, headless=false):World {
  scene.clearColor=Color4.FromHexString('#cbdde5ff');scene.fogMode=Scene.FOGMODE_EXP2;scene.fogDensity=.0028;scene.fogColor=Color3.FromHexString('#cbdde5');
  const mat=(name:string,hex:string,spec=.035)=>{const m=new StandardMaterial(name,scene);m.diffuseColor=Color3.FromHexString(hex);m.specularColor=new Color3(spec,spec,spec);m.specularPower=48;return m;};
  const plaster=mat('Warm ivory plaster','#eee7d7'),stone=mat('Pale travertine','#d9c7a7'),dark=mat('Dark bronze','#332c25'),wood=mat('Walnut','#624125'),floor=mat('Honed limestone floor','#bcb9b0',.06),oak=mat('Natural oak floor','#a5835e'),grass=mat('Garden lawn','#69764c'),asphalt=mat('Stone pavers','#a89b83'),water=mat('Pool water','#52a6a4',.8),white=mat('Ivory upholstery','#eee8db'),cloth=mat('Sage upholstery','#818d7c'),black=mat('Cinema charcoal','#242626'),leaf=mat('Olive canopy','#354b32',.02),brass=mat('Brushed brass','#b6a170',.5),soil=mat('Planting earth','#615343');
- const interior=socialMaterials(scene,headless);
+ const interior=socialMaterials(scene,headless),bathMaterials=bathroomMaterials(scene,interior,headless);
  water.alpha=.85;water.specularPower=128;
  const entryWood=mat('Dark walnut entry doors','#30251b');
  const glass=mat('Smoked architectural glazing','#9eb9b5',.65);glass.alpha=.25;glass.backFaceCulling=false;
@@ -108,25 +110,15 @@ export function createWorld(scene:Scene, headless=false):World {
  function table(x:number,y:number,z:number,w=2,d=1,m=wood){obstacles.push({name:'Table',x,z,w,d,bottom:y,top:y+.81});box('Table top',x,y+.75,z,w,.12,d,m);for(const a of [-1,1])for(const b of [-1,1])box('Table leg',x+a*(w/2-.14),y+.36,z+b*(d/2-.12),.07,.72,.07,dark);}
  function plant(x:number,y:number,z:number,scale=1){cylinder('Planter',x,y+.3*scale,z,.62*scale,.6*scale,stone,.8*scale);const crown=MeshBuilder.CreateSphere('Indoor foliage',{diameter:1.15*scale,segments:8},scene);crown.position.set(x,y+1.1*scale,z);crown.scaling.y=1.5;crown.material=leaf;crown.isPickable=false;}
  function tree(x:number,z:number,s=1){cylinder('Olive trunk',x,1.4*s,z,.27*s,2.8*s,wood,.18*s);for(const [dx,dz,dy] of [[0,0,3.6],[-.7,.2,3.2],[.6,-.4,3.3]]){const c=MeshBuilder.CreateSphere('Olive crown',{diameter:2.6*s,segments:8},scene);c.position.set(x+dx*s,dy*s,z+dz*s);c.scaling.y=.8;c.material=leaf;c.isPickable=false;shadows.addShadowCaster(c);}}
- function bed(r:Room){const y=r.floor*STOREY;const x=r.master?-4.8:r.x+(r.x<0?1.2:-.7),z=r.master?16.8:r.depth<=6?r.z+.2:r.z-.8;
-  box('Bedroom rug',x,y+.02,z+1,4,.025,4.8,white);
-  box('Bed plinth',x,y+.23,z,2.25,.4,2.6,wood);box('Linen mattress',x,y+.54,z,2.18,.3,2.55,white);box('Duvet',x,y+.74,z+.25,2.2,.13,1.9,cloth);box('Upholstered headboard',x,y+.83,z-1.37,2.8,1.55,.15,cloth);
-  for(const a of [-1,1]){box('Pillow',x+a*.55,y+.78,z-.9,.85,.18,.48,white);box('Bedside cabinet',x+a*1.75,y+.36,z-1,.65,.7,.6,wood);cylinder('Bedside lamp',x+a*1.75,y+.95,z-1,.33,.4,white);}
-  if(['suite-1','suite-4','suite-5'].includes(r.id))box('Wardrobe',r.x,y+1.35,r.z-r.depth/2+.55,2.7,2.7,.6,wood,true);
-  else if(!r.master)box('Wardrobe',r.x+Math.sign(r.x)*(r.width/2-.55),y+1.35,r.z-r.depth/2+1.65,.6,2.7,2.7,wood,true);
- }
- function bathroom(r:Room){const y=r.floor*STOREY,{x,z,w,d}=ensuiteRect(r);
-  box('Ensuite applied finish',x,y+LEVEL.finish,z,w,.002,d,stone);
-  for(const side of [-1,1])panel('Ensuite side',x+side*w/2,z,.12,d,y,3.2);
-  panel('Ensuite back',x,z+d/2,w,.12,y,3.2);
-  wallOpening('Ensuite partition',x,z-d/2,w,'x',y,{offset:-.25,width:1.2,sill:0,head:2.7},plaster,false,.12);
-  door(r.name+' bathroom',x-.85,y,z-d/2,1.2,'x');
-  box('Vanity',x+1,y+.45,z-.6,.65,.9,1.1,wood,true);box('Stone basin',x+1,y+.95,z-.6,.68,.12,1.1,white);box('Mirror',x+1.46,y+1.7,z-.6,.02,1.1,.9,glass);
-  cylinder('Toilet pedestal',x-.9,y+.23,z+.7,.42,.45,white);const bowl=MeshBuilder.CreateSphere('Toilet bowl',{diameter:.56,segments:12},scene);bowl.position.set(x-.9,y+.43,z+.6);bowl.scaling.set(1,.4,1.3);bowl.material=white;box('Toilet cistern',x-.9,y+.65,z+1.15,.55,.65,.18,white);
-  box('Shower tray',x+.55,y+.06,z+.75,1.3,.1,1.3,white);box('Shower glazing',x-.15,y+1.1,z+1,.02,2.2,.8,glass,true);box('Rain shower',x+.55,y+2.4,z+1.2,.32,.04,.32,dark);
+ function bed(r:Room){const y=r.floor*STOREY,{bed:b,wardrobe,front,nightstandWidth:nw,nightstandOffset:no}=bedroomFurniture(r),{x,z,w,d}=b;
+  box('Bedroom rug',x,y+.012,z+.5,w+1.5,.018,d+1,white);
+  box('Bed plinth',x,y+.23,z,w,.4,d,wood,true);box('Linen mattress',x,y+.54,z,w-.07,.3,d-.05,white);box('Duvet',x,y+.74,z+front*.25,w-.05,.13,d-.7,cloth);
+  box('Upholstered headboard',x,y+.83,z-front*(d/2+.07),w+.25,1.55,.14,cloth,true);
+  for(const side of [-1,1]){box('Pillow',x+side*w*.24,y+.78,z-front*(d/2-.4),w*.37,.18,.48,white);box('Bedside cabinet',x+side*no,y+.36,z-front*(d/2-.3),nw,.7,.5,wood,true);cylinder('Bedside lamp',x+side*no,y+.95,z-front*(d/2-.3),.25,.4,white);}
+  if(wardrobe)box('Wardrobe',wardrobe.x,y+1.35,wardrobe.z,wardrobe.w,2.7,wardrobe.d,wood,true);
  }
  function furnish(r:Room){const y=r.floor*STOREY;
-  if(r.kind==='bedroom'){bed(r);bathroom(r);}
+  if(r.kind==='bedroom')bed(r);
   if(r.kind==='office'){table(r.x,y,r.z,2.6,1.2);sofa(r.x,y,r.z+1.8);box('Bookshelf',r.x,y+1.4,r.z+2.65,4,2.8,.5,wood);for(let i=0;i<3;i++)box('Bookshelf shelf',r.x,y+.4+i*.8,r.z+2.35,3.8,.05,.6,dark);box('Desk monitor',r.x,y+1.2,r.z+.25,1,.65,.05,dark);}
   if(r.kind==='gym'){for(let i=0;i<1;i++){box('Treadmill deck',r.x-.35+i*2.6,y+.15,r.z,1.1,.3,2.1,dark);box('Treadmill upright',r.x-.35+i*2.6,y+.8,r.z+.8,.1,1.3,.1,dark);box('Treadmill console',r.x-.35+i*2.6,y+1.4,r.z+.8,.75,.12,.35,black);}box('Exercise mat',r.x,y+.03,r.z+2.2,2,.04,1,cloth);box('Gym mirror',r.x,y+1.7,r.z-r.depth/2+.15,3,2.3,.03,glass);}
   if(r.kind==='cinema'){box('Cinema carpet',r.x,y+.02,r.z,r.width-.3,.03,r.depth-.3,black);box('Cinema screen frame',r.x+3.8,y+1.9,r.z,.12,2.7,5.2,dark);const screen=mat('Projection surface','#9aaeb3');screen.emissiveColor=new Color3(.13,.18,.2);box('Projection screen',r.x+3.72,y+1.9,r.z,.02,2.35,4.8,screen);sofa(r.x+.8,y,r.z+1,-Math.PI/2,black);sofa(r.x-1.8,y,r.z+1,-Math.PI/2,black);}
@@ -148,9 +140,10 @@ export function createWorld(scene:Scene, headless=false):World {
  // One finished datum; disjoint plates eliminate overlapping floor tops and false steps.
  const exterior=mat('Concealed warm light','#ffe0a3');exterior.disableLighting=true;exterior.emissiveColor=Color3.FromHexString('#ffe0a3');
  const plate=(name:string,r:Rect,y:number,m=floor)=>slab(name,r.x,r.z,r.w,r.d,y,m);
- for(const r of disjoint(groundPlates,SOCIAL.floorAreas))plate('Continuous floor 0',r,LEVEL.ground);
+ for(const r of disjoint(groundPlates,[...SOCIAL.floorAreas,...bathrooms.filter(b=>!b.floor).map(b=>b.rect)]))plate('Continuous floor 0',r,LEVEL.ground);
  for(const r of SOCIAL.floorAreas)plate('Continuous social porcelain floor',r,LEVEL.ground,interior.porcelain);
- for(const [level,plates] of [[1,upperPlates],[2,roofPlates]] as const)for(const r of plates)plate('Continuous floor '+level,r,level*STOREY,level===2?stone:floor);
+ for(const [level,plates] of [[1,upperPlates],[2,roofPlates]] as const)for(const r of disjoint(plates,bathrooms.filter(b=>b.floor===level).map(b=>b.rect)))plate('Continuous floor '+level,r,level*STOREY,level===2?stone:floor);
+ for(const b of bathrooms){const shower=bathShower(b);for(const r of disjoint([b.rect],shower?[shower]:[]))plate(b.id+' bathroom floor',r,b.floor*STOREY,bathMaterials.porcelain);if(shower)plate(b.id+' flush shower floor',shower,b.floor*STOREY,bathMaterials.porcelain);}
  for(const e of outline(groundPlates)){const atSteps=Math.abs(e.z+8)<.001&&e.x>.5&&e.x<9;box('Raised house plinth',e.x,grade/2,e.z,e.w,-grade,e.d,stone,!atSteps,true);}
  for(const landing of stairLandings)plate('Return stair landing',landing,landing.y,landing.level===0?interior.marble:stone);
  // Wall faces use one opening component for walls, windows and working doors.
@@ -193,7 +186,16 @@ export function createWorld(scene:Scene, headless=false):World {
    }
    if(r.id==='lounge'&&i===3){passage('Courtyard viewing alcove',f.x,f.z,f.n,f.axis,y,-1.75,1.2);continue;}
    const outer=(i===0&&r.x<0)||(i===1&&r.x>0),rear=i===3&&(r.id==='suite-2'||r.master||r.id==='suite-5');
-   if(rear&&r.floor){glazedPassage(r.name+' balcony',f.x,f.z,f.n,f.axis,y,r.x<0?2:-2,2.2);continue;}
+   if(rear&&r.floor){
+    // A real solid bathroom rear wall replaces the former full-width sidelight.
+    // Keep the bedroom balcony door at its existing position, with glazing only beside the dry room.
+    const bath=bathForSuite(r.id),left=r.x-r.width/2,right=r.x+r.width/2;
+    const split=bath.rect.x+(r.x<0?1:-1)*(bath.rect.w/2+BATH.partition);
+    const solidFrom=r.x<0?left:split,solidTo=r.x<0?split:right;
+    panel(r.name+' bathroom rear masonry',(solidFrom+solidTo)/2,f.z,solidTo-solidFrom,.24,y,STOREY);
+    const glazedFrom=r.x<0?split:left,glazedTo=r.x<0?right:split,centre=(glazedFrom+glazedTo)/2;
+    glazedPassage(r.name+' balcony',centre,f.z,glazedTo-glazedFrom,f.axis,y,r.x+(r.x<0?2:-2)-centre,2.2);continue;
+   }
    if(outer)continue; // Authored as continuous elevations below, independently of rooms.
    if(rear){
     wallOpening(r.name+' garden aperture',f.x,f.z,f.n,f.axis,y,{offset:outer?-.6:1.8,width:Math.min(f.n-2,r.kind==='cinema'?2:4.8),sill:r.kind==='cinema'?2.5:.85,head:3.5},plaster,true,.36);
@@ -254,11 +256,8 @@ export function createWorld(scene:Scene, headless=false):World {
  panel('Pantry back',pantry.x,pantry.z+pantry.d/2,pantry.w,.16,0,3.8);
  passage('Enclosed pantry',pantry.x,pantry.z-pantry.d/2,pantry.w,'x',0,-.25,1.2);
  for(const z of [17.2,18.2,19.2])box('Pantry shelving',16.3,1.3,z,.6,2.6,.8,wood,true);
- // A discrete powder room reached from the front private vestibule, away from dining.
- const powder=ARCH.powder;
- panel('Powder west',powder.x-powder.w/2,powder.z,.16,powder.d,0,3.5);
- passage('Guest half bathroom',powder.x+powder.w/2,powder.z,powder.d,'z',0,0,1.1);
- cylinder('Powder toilet',-11.8,.25,-4.3,.55,.5,white);box('Powder basin',-10.5,.85,-4.65,.8,.18,.45,white);
+ // Seven complete bathroom systems share a coordinated layout/fixture definition.
+ buildBathrooms({scene,obstacles,box,cylinder,door,zone},bathMaterials);
  // Primary dressing room is separate and generous; the bedroom door enters a clear vestibule.
  const dressing=ARCH.wardrobe;
  passage('Primary walk-in closet',dressing.x+dressing.w/2,dressing.z,dressing.d,'z',STOREY,0,1.3);

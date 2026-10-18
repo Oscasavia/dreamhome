@@ -1,6 +1,8 @@
+import {BATH,bathrooms,bathForSuite,bathroomDoor,fixtureRect,bathShower,bathPoint,bathRect,bathRoute,bathClearances,bedroomFurniture,type Bathroom} from './bathroomPlan';
 import {SITE,LEVEL,approachStairs,rooms,roomRect,ensuiteRect,ARCH,STOREY,SITE_SIDE,balconies,stairs,stairLandings,MAIN_STAIR,groundPlates,upperPlates,bounds,type Rect} from './plan';
 import {SOCIAL,diningSeats,islandSeats,seatPosition} from './interiorPlan';
 import {ENVELOPE,sideWalls} from './facades';
+import {bedroomArea} from './bathroomAudit';
 const rect=(r:Rect,fill:string,stroke='#918d83',width=.1)=>`<rect x="${r.x-r.w/2}" y="${-r.z-r.d/2}" width="${r.w}" height="${r.d}" fill="${fill}" stroke="${stroke}" stroke-width="${width}"/>`;
 const label=(x:number,z:number,text:string,size=.6,color='#343d37')=>`<text x="${x}" y="${-z}" text-anchor="middle" font-family="system-ui,sans-serif" font-size="${size}" fill="${color}">${text}</text>`;
 const opening=(x:number,z:number,width:number,along:'x'|'z')=>`<path d="M ${x} ${-z} ${along==='x'?'h':'v'} ${along==='x'?width:-width}" stroke="#f4f1e9" stroke-width=".3"/>`;
@@ -10,8 +12,11 @@ export function floorPlanSvg(floor:number){
  for(const r of rooms.filter(r=>r.floor===floor)){
   parts.push(rect(roomRect(r),r.master?'#e1d3bc':'#eeeadf'));
   const lx=r.id==='suite-3'?r.x+1.35:r.x,title=r.kind==='gym'?'GYM':r.name.replace('Bedroom suite','Suite').replace('Garden suite','Suite');
-  if(r.kind!=='kitchen')parts.push(label(lx,r.master?16:r.z+.4,title,.57),label(lx,r.master?15:r.z-.55,`${r.width} × ${r.depth} m`,.45));else parts.push(label(12,19,'KITCHEN',.4));
-  if(r.ensuite){const b=ensuiteRect(r);parts.push(rect(b,'#dae5e3'),label(b.x,b.z,'BATH',.42),opening(b.x-.85,b.z-b.d/2,1.2,'x'));}
+  if(!r.ensuite&&r.kind!=='kitchen')parts.push(label(lx,r.z+.4,title,.57),label(lx,r.z-.55,`${r.width} × ${r.depth} m`,.45));else if(r.kind==='kitchen')parts.push(label(12,19,'KITCHEN',.4));
+  if(r.ensuite){parts.push(bathPlanParts(bathForSuite(r.id)));const f=bedroomFurniture(r);parts.push(rect(f.bed,'#d8ccb9'),rect({x:f.bed.x,z:f.bed.z-f.front*(f.bed.d/2-.3),w:f.bed.w-.2,d:.4},'#f4f1e9','#918d83',.03));if(f.wardrobe)parts.push(rect(f.wardrobe,'#bca68a'));
+   const [tx,tz]=({ 'suite-1':[-5.4,9.5],'suite-2':[-6,18.5],'suite-3':[-8.1,-1.7],'suite-4':[-4.5,8.7],master:[-5,14.6],'suite-5':[12,18.5]} as Record<string,number[]>)[r.id];
+   parts.push(label(tx,tz,title,r.id==='suite-3'?.38:.52),label(tx,tz-.55,`${bedroomArea(r).bedroomAfter.toFixed(1)} m² dry bedroom`,['suite-3','suite-4','suite-5'].includes(r.id)?.25:.32));
+  }
   if(!r.open)parts.push(opening(r.entry.x,r.entry.z,r.entry.width,r.entry.along));
   else parts.push(opening(r.x-r.width/2,r.z-r.depth/2,r.depth,'z'));
   if(r.id==='lounge')parts.push(opening(10.65,3.6,1.2,'x'));
@@ -19,7 +24,7 @@ export function floorPlanSvg(floor:number){
  parts.push(rect(ARCH.courtyard,'#b7c5a4'),label(11.25,8,'FAMILY COURT',.42),label(11.25,7,'4.5 × 5 m',.42));
  if(floor){for(const [name,r] of [['WEST LOGGIA',ENVELOPE.westLoggia],['EAST LOGGIA',ENVELOPE.eastLoggia]] as const)parts.push(rect(r,'#d3c3a5'),label(r.x,r.z,name,.28));for(const face of sideWalls)for(const o of face.openings)if(o.door)parts.push(opening(face.x,o.at-o.width/2,o.width,'z'));parts.push(rect(ARCH.livingVoid,'#cfdddd'),label(3.25,9.2,'DOUBLE-HEIGHT',.45),label(3.25,8.5,'LIVING VOID',.45),label(4.5,17,'REAR OVERLOOK',.4),label(7.7,8,'GALLERY',.3),rect(ARCH.wardrobe,'#cbbda2'),label(ARCH.wardrobe.x,ARCH.wardrobe.z,'WALK-IN CLOSET',.42),rect(ARCH.rearTerrace,'#d3c3a5'),label(4.5,19,'GARDEN TERRACE',.4));for(const b of balconies)parts.push(rect(b,'#d3c3a5'),label(b.x,b.z,'BALCONY',.45));}
  else{
-  parts.push(label(3.25,8.7,'DOUBLE-HEIGHT LIVING',.4),label(SOCIAL.dining.x,18.8,'DINING',.45),label(4.5,-2,'FOYER',.55),rect(ARCH.pantry,'#cfc6b4'),label(ARCH.pantry.x,ARCH.pantry.z,'PANTRY',.42),rect(ARCH.powder,'#dae5e3'),label(ARCH.powder.x,ARCH.powder.z,'WC',.4));
+  parts.push(label(3.25,8.7,'DOUBLE-HEIGHT LIVING',.4),label(SOCIAL.dining.x,18.8,'DINING',.45),label(4.5,-2,'FOYER',.55),rect(ARCH.pantry,'#cfc6b4'),label(ARCH.pantry.x,ARCH.pantry.z,'PANTRY',.42),bathPlanParts(bathrooms.find(b=>b.half)!));
   for(const [r,fill] of [[SOCIAL.rug,'#d4cbb8'],[SOCIAL.sofa,'#eee9df'],[SOCIAL.chaise,'#eee9df'],[SOCIAL.coffee,'#9b8062'],[SOCIAL.dining,'#9b8062'],[SOCIAL.island,'#f5f2eb']] as const)parts.push(rect(r,fill));
   for(const seat of [...diningSeats,...islandSeats]){const p=seatPosition(seat);parts.push(rect({...p,w:.55,d:.55},'#b2a58f'));}
   parts.push(rect({x:.25,z:SOCIAL.media.z,w:.3,d:SOCIAL.media.width},'#a69781'),label(SOCIAL.island.x,SOCIAL.island.z,'4.4 m',.32));
@@ -30,7 +35,7 @@ export function floorPlanSvg(floor:number){
  // Major partitions and openings clarify the protected private hall and open social plan.
  parts.push(rect(bounds(-.12,.12,floor?1:-5,20),'#918d83','#918d83',0),opening(0,floor?16.35:16.55,1.5,'z'));
  if(floor){parts.push(opening(-7,12.15,1.3,'z'),opening(4.6,18,2.4,'x'),label(11.25,4.25,'COURT ALCOVE',.25));for(const b of balconies)parts.push(opening(b.x+(b.x<0?2:-2)-1.1,20,2.2,'x'));}
- else parts.push(opening(ENVELOPE.foyerPortal.x,ENVELOPE.foyerPortal.z-ENVELOPE.foyerPortal.width/2,ENVELOPE.foyerPortal.width,'z'),rect(bounds(-2,0,2.58,2.82),'#918d83','#918d83',0),opening(-1.7,2.7,1.4,'x'),opening(14.35,16.5,1.2,'x'),opening(-9.5,-4.55,1.1,'z'),opening(9,5.7,1.6,'z'),opening(10,10,1.6,'x'),opening(SITE.entrance.x-SITE.entrance.width/2,SITE.entrance.z,SITE.entrance.width,'x'),opening(5.3,20,2.4,'x'));
+ else parts.push(opening(ENVELOPE.foyerPortal.x,ENVELOPE.foyerPortal.z-ENVELOPE.foyerPortal.width/2,ENVELOPE.foyerPortal.width,'z'),rect(bounds(-2,0,2.58,2.82),'#918d83','#918d83',0),opening(-1.7,2.7,1.4,'x'),opening(14.35,16.5,1.2,'x'),opening(9,5.7,1.6,'z'),opening(10,10,1.6,'x'),opening(SITE.entrance.x-SITE.entrance.width/2,SITE.entrance.z,SITE.entrance.width,'x'),opening(5.3,20,2.4,'x'));
  if(!floor){const s=approachStairs[0];parts.push(rect(SITE.veranda,'#d3c3a5'),rect(s,'#d3c3a5'));for(let i=1;i<s.steps;i++)parts.push(`<path d="M ${s.x-s.w/2} ${-(s.z-s.d/2+i*s.d/s.steps)} h ${s.w}" stroke="#827c71" stroke-width=".06"/>`);}
  else {for(const r of [SITE.frontBalcony,SITE.leftBalcony])parts.push(rect(r,'#d3c3a5'),label(r.x,r.z,'BALCONY',.4));parts.push(opening(4.2,-3,2.6,'x'),opening(-8,-3,1.4,'x'));}
  for(const l of stairLandings.filter(l=>floor||l.level===0))parts.push(rect(l,'#d3cbb8'));
@@ -53,3 +58,27 @@ ${rect({x:-5,z:28,w:11.5,d:4},'#659c9b')}${rect({x:13,z:26,w:7,d:7},'#938774')}
 ${label(25.5,-4.4,'GARAGE · WEST DOORS',.72)}${label(-5,28,'POOL',1)}${label(13,26,'GAZEBO',1)}
 ${label(0,-21,'OPEN PAVED ARRIVAL COURT',1)}${label(0,-23,`EXTERIOR ${LEVEL.site.toFixed(2)} m`,.7)}${label(0,-30,'SOUTH / FRONT · SEPARATE GATES',.7)}${label(-27,0,'WEST',.8)}${label(27,0,'EAST',.8)}
 <circle id="mapDot" cx="5.5" cy="16" r=".8" fill="#edbd71" stroke="#273b2a" stroke-width=".3"/></svg>`;}
+
+function bathPlanParts(b:Bathroom,detail=false){
+ const out=[rect(b.rect,'#e1e8e3','#6b7b74',.10)],shower=bathShower(b),door=bathroomDoor(b);
+ if(shower){out.push(rect(shower,'#c3d7d9','#8bacae',0));const s=b.shower!,front=b.rect.d-s.d;
+  const points=[[0,front],[s.w,front],[s.w,front+s.entry],[s.w,b.rect.d]].map(([u,v])=>bathPoint(b,u,v));
+  for(const [a,c] of [[points[0],points[1]],[points[2],points[3]]])out.push(`<path d="M ${a.x} ${-a.z} L ${c.x} ${-c.z}" stroke="#698d93" stroke-width=".04"/>`);
+ }
+ for(const f of b.fixtures){const r=fixtureRect(b,f);out.push(rect(r,f.kind==='vanity'?'#b79f7f':f.kind==='linen'?'#aa9376':'#f7f4ec','#8b857b',.035));if(detail)out.push(label(r.x,r.z,f.kind.toUpperCase(),.12));}
+ for(const p of b.partitions??[])out.push(rect(bathRect(b,p.u,p.v,p.w,p.d),'#b1b5a8','#6b7b74',.03));
+ out.push(opening(door.x-(door.along==='x'?door.width/2:0),door.z-(door.along==='z'?door.width/2:0),door.width,door.along));
+ const title=bathPoint(b,b.primary?2.7:b.half?2.25:1.85,b.primary?1.9:b.half?.95:1.85);
+ if(!detail)out.push(label(title.x,title.z,b.half?'WC':(b.rect.w*b.rect.d).toFixed(1)+' m²',.30));
+ if(detail){
+  const hinge=b.half?{u:b.rect.w+.1,v:b.door.start+BATH.jamb}:{u:b.door.start+BATH.jamb+BATH.leaf,v:-.1};
+  const arc=Array.from({length:25},(_,i)=>{const a=i*Math.PI/48;return bathPoint(b,hinge.u-BATH.leaf*(b.half?Math.sin(a):Math.cos(a)),hinge.v+BATH.leaf*(b.half?Math.cos(a):Math.sin(a)));});
+  const h=bathPoint(b,hinge.u,hinge.v),end=arc.at(-1)!;
+  out.push(`<polyline points="${arc.map(p=>`${p.x},${-p.z}`).join(' ')}" fill="none" stroke="#8c7252" stroke-width=".018" stroke-dasharray=".06 .04"/><path d="M ${h.x} ${-h.z} L ${end.x} ${-end.z}" stroke="#8c7252" stroke-width=".04"/>`);
+  for(const c of bathClearances(b))out.push(rect(c.rect,'none','#b0946c',.018));
+  const path=bathRoute(b);out.push(`<polyline points="${path.map(p=>`${p.x},${-p.z}`).join(' ')}" fill="none" stroke="#587d68" stroke-width=".035" stroke-dasharray=".1 .07"/>`);
+  out.push(label(b.rect.x,b.rect.z+b.rect.d/2+.35,b.name,.20),label(b.rect.x,b.rect.z-b.rect.d/2-.65,`${b.rect.w.toFixed(2)} × ${b.rect.d.toFixed(2)} m clear · ${(b.rect.w*b.rect.d).toFixed(2)} m²`,.17));
+ }
+ return out.join('');
+}
+export function bathroomPlanSvg(b:Bathroom){return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${b.rect.x-b.rect.w/2-.6} ${-b.rect.z-b.rect.d/2-.65} ${b.rect.w+1.5} ${b.rect.d+1.6}" role="img" aria-label="${b.name} finished bathroom plan">${bathPlanParts(b,true)}</svg>`;}

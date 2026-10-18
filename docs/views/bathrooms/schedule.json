@@ -1,0 +1,140 @@
+[
+  {
+    "id": "suite-1",
+    "room": "Garden suite 01",
+    "module": 88,
+    "beforeBathroom": {
+      "width": 2.95,
+      "depth": 2.98,
+      "area": 8.791
+    },
+    "afterBathroom": {
+      "width": 3.6,
+      "depth": 3.8,
+      "area": 13.68
+    },
+    "bedroomBefore": 71.15310000000001,
+    "bedroomAfter": 65.59000000000002,
+    "bed": {
+      "x": -6.3,
+      "z": 6.2,
+      "w": 2.25,
+      "d": 2.6
+    }
+  },
+  {
+    "id": "suite-2",
+    "room": "Garden suite 02",
+    "module": 117,
+    "beforeBathroom": {
+      "width": 2.95,
+      "depth": 2.98,
+      "area": 8.791
+    },
+    "afterBathroom": {
+      "width": 3.6,
+      "depth": 4,
+      "area": 14.4
+    },
+    "bedroomBefore": 98.73890000000006,
+    "bedroomAfter": 92.22760000000004,
+    "bed": {
+      "x": -7.3,
+      "z": 14.7,
+      "w": 2.25,
+      "d": 2.6
+    }
+  },
+  {
+    "id": "suite-3",
+    "room": "Bedroom suite 03",
+    "module": 42,
+    "beforeBathroom": {
+      "width": 2.95,
+      "depth": 2.98,
+      "area": 8.791
+    },
+    "afterBathroom": {
+      "width": 3.2,
+      "depth": 4,
+      "area": 12.8
+    },
+    "bedroomBefore": 27.019099999999998,
+    "bedroomAfter": 22.49400000000001,
+    "bed": {
+      "x": -7.65,
+      "z": 0.4,
+      "w": 1.9,
+      "d": 2.3
+    }
+  },
+  {
+    "id": "suite-4",
+    "room": "Bedroom suite 04",
+    "module": 64,
+    "beforeBathroom": {
+      "width": 2.95,
+      "depth": 2.98,
+      "area": 8.791
+    },
+    "afterBathroom": {
+      "width": 3.6,
+      "depth": 3.6,
+      "area": 12.96
+    },
+    "bedroomBefore": 47.87310000000001,
+    "bedroomAfter": 43.074000000000005,
+    "bed": {
+      "x": -5.7,
+      "z": 4.95,
+      "w": 2.1,
+      "d": 2.5
+    }
+  },
+  {
+    "id": "master",
+    "room": "Primary suite",
+    "module": 117,
+    "beforeBathroom": {
+      "width": 2.95,
+      "depth": 2.98,
+      "area": 8.791
+    },
+    "afterBathroom": {
+      "width": 5.2,
+      "depth": 4.2,
+      "area": 21.840000000000003
+    },
+    "bedroomBefore": 81.84349999999996,
+    "bedroomAfter": 67.68039999999998,
+    "bed": {
+      "x": -4.8,
+      "z": 16.8,
+      "w": 2.25,
+      "d": 2.6
+    }
+  },
+  {
+    "id": "suite-5",
+    "room": "Bedroom suite 05",
+    "module": 80,
+    "beforeBathroom": {
+      "width": 2.95,
+      "depth": 2.98,
+      "area": 8.791
+    },
+    "afterBathroom": {
+      "width": 3.4,
+      "depth": 3.8,
+      "area": 12.92
+    },
+    "bedroomBefore": 63.15309999999999,
+    "bedroomAfter": 58.39399999999999,
+    "bed": {
+      "x": 12.3,
+      "z": 14.2,
+      "w": 2.25,
+      "d": 2.6
+    }
+  }
+]

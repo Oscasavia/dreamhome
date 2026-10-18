@@ -1,3 +1,4 @@
+import {bathForSuite,bathrooms,bathRoute} from './bathroomPlan';
 export const ACRE_M2=4046.8564224;
 export const SITE_SIDE=Math.sqrt(ACRE_M2);
 export const STOREY=4.2;
@@ -39,7 +40,7 @@ export const rooms:Room[]=[
 ];
 export const roomRect=(r:Room):Rect=>({x:r.x,z:r.z,w:r.width,d:r.depth});
 export const roomEntry=(r:Room)=>r.entry;
-export const ensuiteRect=(r:Room):Rect=>({x:r.x+Math.sign(r.x)*(r.width/2-1.7),z:r.z+r.depth/2-1.7,w:3.1,d:3.1});
+export const ensuiteRect=(r:Room):Rect=>bathForSuite(r.id).rect;
 export const balconies=[bounds(-15,-2,20,23),bounds(9,17,20,22.8)];
 export const galleries=[ARCH.privateHall,ARCH.frontGallery,ARCH.eastGallery,ARCH.overlook];
 export interface Stair extends Rect {base:number;rise:number;direction:1|-1;steps:number;level:number}
@@ -87,6 +88,7 @@ export function outline(rects:Rect[]):Rect[]{
  }return out;
 }
 export const destinations=[
+ ...bathrooms.map(b=>({id:'bath-'+b.id,...bathRoute(b)[2],name:b.name,y:b.floor*STOREY,yaw:0})),
  {id:'arrival',name:'Open arrival court',x:5.5,y:LEVEL.site,z:-16,yaw:0},
  {id:'foyer',name:'Entrance foyer',x:5.5,y:LEVEL.ground,z:-3.5,yaw:0},
  {id:'living',name:'Living / dining / kitchen',x:5.9,y:LEVEL.ground,z:3,yaw:0},

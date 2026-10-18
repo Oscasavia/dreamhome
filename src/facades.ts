@@ -1,3 +1,4 @@
+import {bathForSuite} from './bathroomPlan';
 import {bounds,LEVEL} from './plan';
 
 // Elevation composition is independent of room iteration. Coordinates along a face are Z.
@@ -12,15 +13,15 @@ export const ENVELOPE={
 export const sideWalls:SideWall[]=[
  {name:'Travertine west front return',x:-13.4,from:-6.8,to:-3,level:0,material:'stone',inset:.22,openings:[]},
  {name:'West continuous stone base',x:-13,from:-3,to:11,level:0,material:'stone',inset:.22,openings:[
-  {at:-.4,width:2.8,sill:1.1,head:3.35},{at:5.65,width:3.6,sill:1.3,head:3.35},{at:9.3,width:1,sill:2.5,head:3.35}]},
+  {at:-.4,width:2.8,sill:1.1,head:3.35},{at:5.45,width:2.7,sill:1.3,head:3.35},bathForSuite('suite-1').window!]},
  {name:'West quiet upper front',x:-13,from:-3,to:3,level:LEVEL.upper,material:'stone',inset:.22,openings:[
-  {at:-1.1,width:1.6,sill:.7,head:3.5},{at:2,width:.8,sill:2.5,head:3.5}]},
+  {at:-2.3,width:.8,sill:.9,head:3.35},bathForSuite('suite-3').window!]},
  {name:'West loggia inner wall',x:-10,from:3,to:11,level:LEVEL.upper,material:'plaster',inset:.22,openings:[
-  {at:5.6,width:2.4,sill:0,head:3.35,door:'Suite 04 west loggia'},{at:9,width:1,sill:2.5,head:3.35}]},
+  {at:5.6,width:2.4,sill:0,head:3.35,door:'Suite 04 west loggia'},bathForSuite('suite-4').window!]},
  {name:'West projecting garden base',x:-15,from:11,to:20,level:0,material:'plaster',inset:.22,openings:[
-  {at:14.9,width:3.6,sill:1.2,head:3.35},{at:18.5,width:1,sill:2.5,head:3.35}]},
+  {at:13.6,width:3.2,sill:1.2,head:3.35},bathForSuite('suite-2').window!]},
  {name:'West primary solid volume',x:-15,from:11,to:20,level:LEVEL.upper,material:'plaster',inset:.22,openings:[
-  {at:15.2,width:1.8,sill:.65,head:3.5},{at:18.5,width:1,sill:2.5,head:3.5}]},
+  {at:14.9,width:.8,sill:.9,head:3.35},bathForSuite('master').window!]},
  {name:'East cinema stone base',x:17,from:-3,to:4,level:0,material:'stone',inset:-.22,openings:[
   {at:.5,width:3.8,sill:3.3,head:3.8}]},
  {name:'East wellness wall',x:17,from:4,to:10,level:0,material:'plaster',inset:-.22,openings:[
@@ -32,7 +33,7 @@ export const sideWalls:SideWall[]=[
  {name:'East quiet link',x:17,from:4,to:10,level:LEVEL.upper,material:'stone',inset:-.22,openings:[
   {at:7,width:1.25,sill:1.1,head:3.5}]},
  {name:'East garden suite',x:17,from:10,to:20,level:LEVEL.upper,material:'plaster',inset:-.22,openings:[
-  {at:13.2,width:4.4,sill:.75,head:3.5}]},
+  {at:13.2,width:4.4,sill:.75,head:3.5},bathForSuite('suite-5').window!]},
 ];
 
 // Front proportions derived from the approved image; metre assumptions, not surveyed dimensions.

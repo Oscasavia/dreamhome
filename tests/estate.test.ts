@@ -8,6 +8,7 @@ import {rooms,roomRect,ensuiteRect,SITE_SIDE,ACRE_M2,STOREY,LEVEL,ARCH,SITE,appr
 import {FURNITURE,furnitureRoute,furnitureHits,clearanceSolids} from '../src/stairClearance';
 import {SOCIAL,diningSeats,islandSeats,occupiedSeat} from '../src/interiorPlan';
 import {ENVELOPE,sideWalls} from '../src/facades';
+import {bedroomFurniture} from '../src/bathroomPlan';
 function fixture(){const engine=new NullEngine(),scene=new Scene(engine),world=createWorld(scene,true);return {world,scene,done(){scene.dispose();engine.dispose();}};}
 function openAll(w:ReturnType<typeof createWorld>){for(const d of w.doors)d.open=true;for(let i=0;i<80;i++)w.update(.05,new Vector3());}
 test('six generous suites, compact internal court, separate pantry and dressing room',()=>{
@@ -51,12 +52,30 @@ test('return stair flights and intermediate landings connect all three levels in
 });
 test('all destinations, private rooms, baths, closet, pantry, galleries and terraces are connected',()=>{
  const f=fixture(),w=f.world;openAll(w);for(const d of destinations)assert.equal(blocked(d.x,d.z,d.y,w.obstacles),false,'destination '+d.id);
- const step=.25,minX=-15,minZ=-7,nx=137,nz=129;
+ const step=.125,minX=-15,minZ=-7,nx=273,nz=257;
  for(const level of [0,1,2]){
   const y=level*STOREY,seen=new Set<number>(),queue:number[]=[],cell=(x:number,z:number)=>Math.round((z-minZ)/step)*nx+Math.round((x-minX)/step);
   const seed=level===0?cell(3,-3.5):level===1?cell(MAIN_STAIR.upperX,-.4):cell(-2.9,-4.3);queue.push(seed);seen.add(seed);
   for(let i=0;i<queue.length;i++){const id=queue[i],ix=id%nx,iz=Math.floor(id/nx);for(const [dx,dz] of [[1,0],[-1,0],[0,1],[0,-1]]){const ax=ix+dx,az=iz+dz,k=az*nx+ax;if(ax<0||az<0||ax>=nx||az>=nz||seen.has(k))continue;const x=minX+ax*step,z=minZ+az*step;if(Math.abs(groundHeight(x,z,y,w.surfaces)-y)>.01||blocked(x,z,y,w.obstacles))continue;seen.add(k);queue.push(k);}}
   const reach=(x:number,z:number,name:string)=>assert.ok(seen.has(cell(x,z)),`${name} disconnected at ${x},${z}, floor ${level}`);
+  const reachExact=(x:number,z:number,name:string)=>{
+   assert.equal(blocked(x,z,y,w.obstacles),false,name+' standing space');
+   const ix=Math.round((x-minX)/step),iz=Math.round((z-minZ)/step);
+   assert.ok([-1,0,1].some(dx=>[-1,0,1].some(dz=>{
+    if(!seen.has((iz+dz)*nx+ix+dx))return false;
+    const tx=minX+(ix+dx)*step,tz=minZ+(iz+dz)*step;
+    for(let i=0;i<=10;i++)if(blocked(x+(tx-x)*i/10,z+(tz-z)*i/10,y,w.obstacles))return false;
+    return true;
+   })),name+' connects to room circulation');
+  };
+  for(const r of rooms.filter(r=>r.floor===level&&r.ensuite)){
+   const {bed,wardrobe,front}=bedroomFurniture(r);
+   for(const side of [-1,1])reachExact(bed.x+side*(bed.w/2+.29),bed.z,r.name+' bedside '+side);
+   reachExact(bed.x,bed.z+front*(bed.d/2+.4),r.name+' bed foot');
+   if(wardrobe){const narrow=wardrobe.w<wardrobe.d;
+    reachExact(wardrobe.x+(narrow?(wardrobe.x<bed.x?1:-1)*(wardrobe.w/2+.6):0),wardrobe.z+(narrow?0:wardrobe.d/2+.6),r.name+' wardrobe front');
+   }
+  }
   for(const r of rooms.filter(r=>r.floor===level)){const e=r.entry;reach(e.x+(e.along==='x'?e.width/2:Math.sign(r.x)*.6),e.z+(e.along==='z'?e.width/2:.6),r.name);if(r.ensuite){const b=ensuiteRect(r);reach(b.x-.25,b.z-.8,r.name+' bath');}}
   if(!level){reach(10,7,'courtyard');reach(15,17.5,'pantry');reach(-10.5,-4,'powder');}
   if(level===1){reach(5.5,-5.7,'entrance balcony');reach(-9,-5,'left balcony');reach(-11.5,5.6,'west loggia');reach(15.6,.5,'east loggia');reach(11.25,4.25,'courtyard viewing alcove');reach(4.5,17,'overlook');reach(-8.5,12.8,'closet');reach(6.5,19,'garden terrace');reach(-4,21,'primary balcony');reach(11,21,'east balcony');}
