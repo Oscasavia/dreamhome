@@ -8,6 +8,8 @@ The latest redesign uses a compact 4.5 × 5 m offset internal courtyard. Preserv
 
 Exterior composition is authored in `src/facades.ts`; do not restore automatic identical room-by-room side windows. Preserve both accessible recessed side loggias and the broad foyer-to-stair opening. Keep the bedroom privacy threshold beyond the stair approach and retain the living media spine.
 
+The approved ivory-mansion image now controls the front. Preserve the raised veranda (interior 0 m, site −0.75 m), five shallow approach steps, open paved forecourt and detached garage at X 21–30 / Z −18 to −6. All three garage doors face west: cars enter along +X. Do not restore any roundabout. `SITE`, `FRONT` and `approachStairs` define these assumptions. Repeated foliage uses thin instances; exclude those meshes from static merging. Textures must explicitly repeat rather than clamp metre-based UVs.
+
 ## Workflow
 
 - This is a Babylon.js + TypeScript + Vite browser application. Do not replace it with React, a database, a static rendered image, or a Godot project without a user request.

@@ -7,12 +7,13 @@ export const ENVELOPE={
  wallDepth:.48,reveal:.22,edgeDepth:.55,guard:1.1,
  westLoggia:bounds(-13,-10,3,11),eastLoggia:bounds(14.4,17,-3,4),
  foyerPortal:{x:0,z:-2.1,length:5.8,width:4.8,head:3.65},
- stairTower:bounds(-6.2,-1.8,-5.3,3.2),towerTop:11.3,
+ stairTower:bounds(-6.2,-1.8,-5.3,3.2),towerTop:10.85,
 } as const;
 export const sideWalls:SideWall[]=[
- {name:'West continuous stone base',x:-13,from:-5,to:11,level:0,material:'stone',inset:.22,openings:[
+ {name:'Travertine west front return',x:-13.4,from:-6.8,to:-3,level:0,material:'stone',inset:.22,openings:[]},
+ {name:'West continuous stone base',x:-13,from:-3,to:11,level:0,material:'stone',inset:.22,openings:[
   {at:-.4,width:2.8,sill:1.1,head:3.35},{at:5.65,width:3.6,sill:1.3,head:3.35},{at:9.3,width:1,sill:2.5,head:3.35}]},
- {name:'West quiet upper front',x:-13,from:-3,to:3,level:LEVEL.upper,material:'plaster',inset:.22,openings:[
+ {name:'West quiet upper front',x:-13,from:-3,to:3,level:LEVEL.upper,material:'stone',inset:.22,openings:[
   {at:-1.1,width:1.6,sill:.7,head:3.5},{at:2,width:.8,sill:2.5,head:3.5}]},
  {name:'West loggia inner wall',x:-10,from:3,to:11,level:LEVEL.upper,material:'plaster',inset:.22,openings:[
   {at:5.6,width:2.4,sill:0,head:3.35,door:'Suite 04 west loggia'},{at:9,width:1,sill:2.5,head:3.35}]},
@@ -33,3 +34,11 @@ export const sideWalls:SideWall[]=[
  {name:'East garden suite',x:17,from:10,to:20,level:LEVEL.upper,material:'plaster',inset:-.22,openings:[
   {at:13.2,width:4.4,sill:.75,head:3.5}]},
 ];
+
+// Front proportions derived from the approved image; metre assumptions, not surveyed dimensions.
+export const FRONT={
+ left:{minX:-13.4,maxX:-2.2,faceZ:-6.8,recessZ:-3,openingMin:-12,openingMax:-6.2,top:8.95},
+ slot:{x:-1.15,width:1.35,frontZ:-5.3,top:8.7},
+ frame:{minX:0,maxX:9.6,frontZ:-8,backZ:-3,thickness:.85,top:9.5},
+ quiet:{minX:9.6,maxX:17,frontZ:-3,top:9.05},
+};

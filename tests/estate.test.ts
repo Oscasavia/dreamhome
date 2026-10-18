@@ -4,7 +4,7 @@ import {NullEngine} from '@babylonjs/core/Engines/nullEngine';
 import {Scene} from '@babylonjs/core/scene';
 import {Vector3} from '@babylonjs/core/Maths/math.vector';
 import {createWorld} from '../src/world';
-import {rooms,roomRect,ensuiteRect,SITE_SIDE,ACRE_M2,STOREY,LEVEL,ARCH,groundPlates,upperPlates,roofPlates,stairs,stairPoint,groundHeight,blocked,destinations} from '../src/plan';
+import {rooms,roomRect,ensuiteRect,SITE_SIDE,ACRE_M2,STOREY,LEVEL,ARCH,SITE,approachStairs,groundPlates,upperPlates,roofPlates,stairs,stairPoint,groundHeight,blocked,destinations} from '../src/plan';
 import {ENVELOPE,sideWalls} from '../src/facades';
 function fixture(){const engine=new NullEngine(),scene=new Scene(engine),world=createWorld(scene,true);return {world,scene,done(){scene.dispose();engine.dispose();}};}
 function openAll(w:ReturnType<typeof createWorld>){for(const d of w.doors)d.open=true;for(let i=0;i<80;i++)w.update(.05,new Vector3());}
@@ -34,7 +34,7 @@ test('every door opens a clear passage with continuous support',()=>{
 });
 test('direct social route stays level and clear of courtyard, island, dining and media furniture',()=>{
  const f=fixture(),w=f.world;openAll(w);
- const route=[[3,-7],[3,2],[6.5,2],[6.5,11.3],[12,11.3],[6.5,11.3],[6.5,21]];
+ const route=[[5.5,-7],[5.5,2],[6.5,2],[6.5,11.3],[12,11.3],[6.5,11.3],[6.5,21]];
  for(let i=1;i<route.length;i++){const a=route[i-1],b=route[i],n=Math.ceil(Math.hypot(b[0]-a[0],b[1]-a[1])/.05);for(let k=0;k<=n;k++){const x=a[0]+(b[0]-a[0])*k/n,z=a[1]+(b[1]-a[1])*k/n;assert.equal(blocked(x,z,LEVEL.ground,w.obstacles),false,`social route ${x},${z}`);assert.ok(Math.abs(groundHeight(x,z,0,w.surfaces))<.001,`flat finished floor ${x},${z}`);}}
  f.done();
 });
@@ -56,7 +56,7 @@ test('all destinations, private rooms, baths, closet, pantry, galleries and terr
   const reach=(x:number,z:number,name:string)=>assert.ok(seen.has(cell(x,z)),`${name} disconnected at ${x},${z}, floor ${level}`);
   for(const r of rooms.filter(r=>r.floor===level)){const e=r.entry;reach(e.x+(e.along==='x'?e.width/2:Math.sign(r.x)*.6),e.z+(e.along==='z'?e.width/2:.6),r.name);if(r.ensuite){const b=ensuiteRect(r);reach(b.x-.25,b.z-.8,r.name+' bath');}}
   if(!level){reach(10,7,'courtyard');reach(15,17.5,'pantry');reach(-10.5,-4,'powder');}
-  if(level===1){reach(-11.5,5.6,'west loggia');reach(15.6,.5,'east loggia');reach(11.25,4.25,'courtyard viewing alcove');reach(4.5,12,'overlook');reach(-8.5,12.8,'closet');reach(6.5,17,'garden terrace');reach(-4,21,'primary balcony');reach(11,21,'east balcony');}
+  if(level===1){reach(5.5,-5.7,'entrance balcony');reach(-9,-5,'left balcony');reach(-11.5,5.6,'west loggia');reach(15.6,.5,'east loggia');reach(11.25,4.25,'courtyard viewing alcove');reach(4.5,12,'overlook');reach(-8.5,12.8,'closet');reach(6.5,17,'garden terrace');reach(-4,21,'primary balcony');reach(11,21,'east balcony');}
   if(level===2){reach(4,8,'roof');reach(11,13,'pergola');}
  }
  w.setNight(true);assert.equal(w.sun.intensity,.18);w.setNight(false);assert.equal(w.sun.intensity,1.15);w.zones[0].on=false;w.update(.05,new Vector3());assert.ok(w.zones.filter(z=>z.light.isEnabled()).length<=4);assert.equal(w.zones[0].light.isEnabled(),false);f.done();
@@ -87,4 +87,21 @@ test('foyer opens directly to the stair while a separate door protects the bedro
  // A sight line from standing eye height to the lower treads crosses no wall collider; stair guard rectangles represent spaced balusters.
  for(let t=0;t<=1;t+=.01){const x=3+(-5.1-3)*t,z=-2.2+(-1.8+2.2)*t,y=LEVEL.eye+(.9-LEVEL.eye)*t;assert.equal(w.obstacles.some(o=>o.name!=='Stair sloping guard'&&x>o.x-o.w/2&&x<o.x+o.w/2&&z>o.z-o.d/2&&z<o.z+o.d/2&&y>o.bottom&&y<o.top),false,'stair sightline');}
  f.done();
+});
+
+
+test('raised arrival and garden stairs meet the interior smoothly; three garage bays face west',()=>{
+ const f=fixture(),w=f.world;openAll(w);
+ for(const s of approachStairs){
+  for(const direction of [1,-1]){let y=direction===1?s.base:s.base+s.rise;
+   for(let i=0;i<=100;i++){const t=direction===1?i/100:1-i/100,p=stairPoint(s,t);assert.equal(blocked(p.x,p.z,y,w.obstacles),false,'exterior stair clearance');const next=groundHeight(p.x,p.z,y,w.surfaces);assert.ok(Math.abs(next-y)<.02,'smooth exterior support');y=next;}
+   assert.ok(Math.abs(y-(direction===1?0:LEVEL.site))<.001);
+  }
+ }
+ const leaves=w.doors.filter(d=>d.group==='Front entrance');assert.equal(leaves.length,2);assert.equal(leaves.reduce((sum,d)=>sum+d.width,0),SITE.entrance.width);
+ for(const z of SITE.garageBayCentres)for(let x=14;x<29;x+=.1){assert.equal(blocked(x,z,LEVEL.site,w.obstacles),false,'west to east vehicle path');assert.equal(groundHeight(x,z,LEVEL.site,w.surfaces),LEVEL.site);}
+ const bays=w.doors.filter(d=>d.name.startsWith('Garage bay'));assert.ok(bays.every(d=>d.along==='z'&&Math.abs(d.x-SITE.garageDoorX)<.1));
+ assert.ok(SITE.garage.d>SITE.garage.w);assert.ok(SITE.garageDoorX-17>=4,'detached garage gap');
+ for(let x=-18;x<12;x+=1)for(let z=-27;z<-11;z+=1){assert.equal(blocked(x,z,LEVEL.site,w.obstacles),false,'open forecourt');const supports=w.surfaces.filter(s=>Math.abs(s.y-LEVEL.site)<.001&&Math.abs(x-s.x)<s.w/2-.001&&Math.abs(z-s.z)<s.d/2-.001);assert.equal(supports.length,1,'single arrival surface');}
+ assert.equal(w.obstacles.some(o=>/roundabout|island curb/i.test(o.name)),false);f.done();
 });

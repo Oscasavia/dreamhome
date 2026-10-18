@@ -29,7 +29,7 @@ for(const d of doors){
  const cx=d.x+(d.along==='x'?d.width/2:0),cz=d.z+(d.along==='z'?d.width/2:0);
  // Gates are operated from inside the boundary; walking outside the acre is intentionally clamped.
  if(d.name.includes('gate')){
-  await evaluate(`__dreamhome.place(${cx},0,${cz+.8},Math.PI);__dreamhome.world.doors.find(d=>d.name===${JSON.stringify(d.name)}).open=false`);await delay(500);await key('KeyE');await key('KeyE','keyUp');
+  await evaluate(`__dreamhome.place(${cx},${d.y},${cz+.8},Math.PI);__dreamhome.world.doors.find(d=>d.name===${JSON.stringify(d.name)}).open=false`);await delay(500);await key('KeyE');await key('KeyE','keyUp');
   if(!await evaluate(`__dreamhome.world.doors.find(d=>d.name===${JSON.stringify(d.name)}).open`))throw new Error('Gate interaction failed '+d.name);
  }else{
   const heading=d.along==='z'?Math.PI/2:0;
@@ -41,6 +41,12 @@ for(const d of doors){
  }
  report.doors.push(d.name);
 }
+for(const [name,x,y,z,heading,distance,endY] of [
+ ['arrival steps and double entrance',5.5,-.75,-12,0,14,0],
+ ['arrival descent',5.5,0,-7.4,Math.PI,4.6,-.75],
+ ['garden steps descent',6.5,0,23.4,0,3,-.75],
+ ['garden steps ascent',6.5,-.75,26.4,Math.PI,3,0]
+]){const end=await move(x,y,z,heading,distance);if(Math.abs(end[1]-endY)>.04)throw Error('Exterior stair level '+name);report.routes.push({name,end});}
 for(const floor of [0,1]){
  const base=floor*4.2;
  const first=await move(-5.1,base,-3.9,0,5.4);
@@ -56,7 +62,7 @@ for(const floor of [0,1]){
 }
 for(const [name,x,z,heading,distance] of [
  ['foyer to stair opening',3,-2.1,-Math.PI/2,4.5],['stair approach',-1.5,-2.1,Math.PI,2.2],['stair bottom landing',-1.5,-4.3,-Math.PI/2,3.6],
- ['entry to living',3,-7,0,9],['living circulation',6.5,2,0,9.3],
+ ['entry to living',5.5,-7,0,9],['living circulation',6.5,2,0,9.3],
  ['dining to kitchen',6.5,11.3,Math.PI/2,5.5],['dining to garden',6.5,11.3,0,10],
  ['private hall',-1,-2,0,20],['upper private hall',-1,-2,0,20]
 ]){const y=name.startsWith('upper')?4.2:0;const end=await move(x,y,z,heading,distance);if(Math.abs(end[1]-y)>.03)throw Error('Route level '+name);report.routes.push({name,end});}

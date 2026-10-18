@@ -1,4 +1,6 @@
-# Exterior refinement — architectural review
+# Previous exterior refinement — historical review
+
+This documents the pass before the approved ivory reference. For the current architecture and captures, see [IVORY_REVIEW.md](IVORY_REVIEW.md). Its browser results and floor-plan overview have since been updated for the current pass.
 
 The retained entrance frame now belongs to a continuous composition of a stone stair volume, occupied side loggias, quieter private walls and sheltered rear balconies. The study stays downstairs. The foyer opens directly toward the existing return stair; bedroom privacy begins beyond that opening. General interior styling remains a later stage.
 
