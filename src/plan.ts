@@ -1,7 +1,7 @@
 export const ACRE_M2=4046.8564224;
 export const SITE_SIDE=Math.sqrt(ACRE_M2);
 export const STOREY=4.2;
-export const LEVEL={ground:0,upper:STOREY,roof:STOREY*2,site:-.75,eye:1.65,finish:.003} as const;
+export const LEVEL={ground:0,upper:STOREY,roof:STOREY*2,site:-.75,eye:1.65,finish:.003,slabThickness:.24} as const;
 export interface Rect {x:number;z:number;w:number;d:number}
 export const bounds=(x0:number,x1:number,z0:number,z1:number):Rect=>({x:(x0+x1)/2,z:(z0+z1)/2,w:x1-x0,d:z1-z0});
 // Approved image: south/front is -Z, east is +X. Exterior grade is 750 mm below the house.
@@ -13,12 +13,12 @@ export const SITE={
  entrance:{x:5.5,z:-5,width:2.6},frontBalcony:bounds(.6,9,-6.4,-3),leftBalcony:bounds(-13,-6,-6.8,-3),
 } as const;
 export const ARCH={
- courtyard:bounds(9,13.5,5,10),foyer:bounds(0,9,-5,1),living:bounds(0,9,1,11),
- livingVoid:bounds(0,9,1,11),dining:bounds(0,9,11,20),kitchen:bounds(9,17,10,20),
+ courtyard:bounds(9,13.5,5,10),foyer:bounds(0,9,-5,1),living:bounds(0,9,1,16),
+ livingVoid:bounds(0,6.5,1,16),dining:bounds(0,9,11,20),kitchen:bounds(9,17,10,20),
  privateHall:bounds(-2,0,-5,20),stairBay:bounds(-6,-2,-5,3),stairOpening:bounds(-5.95,-2.05,-3.6,2.4),
- overlook:bounds(0,9,11,14),frontGallery:bounds(0,9,-3,1),
+ overlook:bounds(0,9,16,18),eastGallery:bounds(6.5,9,1,16),frontGallery:bounds(0,9,-3,1),
  wardrobe:bounds(-12.7,-7,11.2,14.4),pantry:bounds(13.6,16.8,16.5,19.8),
- powder:bounds(-12.5,-9.5,-5,-3),rearTerrace:bounds(0,9,14,20),
+ powder:bounds(-12.5,-9.5,-5,-3),rearTerrace:bounds(0,9,18,20),
  entryZ:-5,rearZ:20,wall:.24,
 } as const;
 export type RoomKind='bedroom'|'office'|'gym'|'cinema'|'kitchen'|'lounge';
@@ -30,7 +30,7 @@ export const rooms:Room[]=[
  room('suite-2','Garden suite 02',0,bounds(-15,-2,11,20),'bedroom',{x:-2,z:12.2,along:'z',width:1.4},{ensuite:true}),
  room('cinema','Cinema',0,bounds(9,17,-3,4),'cinema',{x:9,z:-1.4,along:'z',width:1.4}),
  room('gym','Wellness studio',0,bounds(13.5,17,4,10),'gym',{x:14.6,z:10,along:'x',width:1.4}),
- room('kitchen','Open kitchen',0,ARCH.kitchen,'kitchen',{x:9,z:12,along:'z',width:5},{open:true}),
+ room('kitchen','Open kitchen',0,ARCH.kitchen,'kitchen',{x:9,z:10.2,along:'z',width:1.2},{open:true}),
  room('suite-3','Bedroom suite 03',1,bounds(-13,-6,-3,3),'bedroom',{x:-8,z:-3,along:'x',width:1.4},{ensuite:true}),
  room('suite-4','Bedroom suite 04',1,bounds(-10,-2,3,11),'bedroom',{x:-2,z:4.2,along:'z',width:1.4},{ensuite:true}),
  room('master','Primary suite',1,bounds(-15,-2,11,20),'bedroom',{x:-2,z:12.2,along:'z',width:1.4},{ensuite:true,master:true}),
@@ -41,7 +41,7 @@ export const roomRect=(r:Room):Rect=>({x:r.x,z:r.z,w:r.width,d:r.depth});
 export const roomEntry=(r:Room)=>r.entry;
 export const ensuiteRect=(r:Room):Rect=>({x:r.x+Math.sign(r.x)*(r.width/2-1.7),z:r.z+r.depth/2-1.7,w:3.1,d:3.1});
 export const balconies=[bounds(-15,-2,20,23),bounds(9,17,20,22.8)];
-export const galleries=[ARCH.privateHall,ARCH.frontGallery,ARCH.overlook];
+export const galleries=[ARCH.privateHall,ARCH.frontGallery,ARCH.eastGallery,ARCH.overlook];
 export interface Stair extends Rect {base:number;rise:number;direction:1|-1;steps:number;level:number}
 export const stairs:Stair[]=[0,1].flatMap(level=>[
  {x:-5.1,z:-1.5,w:1.6,d:4.2,base:level*STOREY,rise:STOREY/2,direction:1 as const,steps:12,level},
@@ -78,9 +78,9 @@ export function outline(rects:Rect[]):Rect[]{
 export const destinations=[
  {id:'arrival',name:'Open arrival court',x:5.5,y:LEVEL.site,z:-16,yaw:0},
  {id:'foyer',name:'Entrance foyer',x:5.5,y:LEVEL.ground,z:-3.5,yaw:0},
- {id:'living',name:'Living / dining / kitchen',x:6.5,y:LEVEL.ground,z:3,yaw:0},
+ {id:'living',name:'Living / dining / kitchen',x:5.9,y:LEVEL.ground,z:3,yaw:0},
  {id:'courtyard',name:'Family courtyard',x:9.75,y:LEVEL.ground,z:7,yaw:0},
- {id:'upper',name:'Living overlook',x:4.5,y:LEVEL.upper,z:12,yaw:Math.PI},
+ {id:'upper',name:'Living overlook',x:4.5,y:LEVEL.upper,z:17,yaw:Math.PI},
  {id:'primary',name:'Primary private hall',x:-1,y:LEVEL.upper,z:13,yaw:-Math.PI/2},
  {id:'entrance-balcony',name:'Entrance balcony',x:5.5,y:LEVEL.upper,z:-5.7,yaw:Math.PI},
  {id:'west-loggia',name:'Suite 04 west loggia',x:-11.5,y:LEVEL.upper,z:5.6,yaw:-Math.PI/2},

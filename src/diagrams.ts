@@ -1,4 +1,5 @@
 import {SITE,LEVEL,approachStairs,rooms,roomRect,ensuiteRect,ARCH,STOREY,SITE_SIDE,balconies,stairs,groundPlates,upperPlates,bounds,type Rect} from './plan';
+import {SOCIAL,diningSeats,islandSeats,seatPosition} from './interiorPlan';
 import {ENVELOPE,sideWalls} from './facades';
 const rect=(r:Rect,fill:string,stroke='#918d83',width=.1)=>`<rect x="${r.x-r.w/2}" y="${-r.z-r.d/2}" width="${r.w}" height="${r.d}" fill="${fill}" stroke="${stroke}" stroke-width="${width}"/>`;
 const label=(x:number,z:number,text:string,size=.6,color='#343d37')=>`<text x="${x}" y="${-z}" text-anchor="middle" font-family="system-ui,sans-serif" font-size="${size}" fill="${color}">${text}</text>`;
@@ -9,21 +10,25 @@ export function floorPlanSvg(floor:number){
  for(const r of rooms.filter(r=>r.floor===floor)){
   parts.push(rect(roomRect(r),r.master?'#e1d3bc':'#eeeadf'));
   const lx=r.id==='suite-3'?r.x+1.35:r.x,title=r.kind==='gym'?'GYM':r.name.replace('Bedroom suite','Suite').replace('Garden suite','Suite');
-  parts.push(label(lx,r.master?16:r.z+.4,title,.57),label(lx,r.master?15:r.z-.55,`${r.width} × ${r.depth} m`,.45));
+  if(r.kind!=='kitchen')parts.push(label(lx,r.master?16:r.z+.4,title,.57),label(lx,r.master?15:r.z-.55,`${r.width} × ${r.depth} m`,.45));else parts.push(label(12,19,'KITCHEN',.4));
   if(r.ensuite){const b=ensuiteRect(r);parts.push(rect(b,'#dae5e3'),label(b.x,b.z,'BATH',.42),opening(b.x-.85,b.z-b.d/2,1.2,'x'));}
   if(!r.open)parts.push(opening(r.entry.x,r.entry.z,r.entry.width,r.entry.along));
   else parts.push(opening(r.x-r.width/2,r.z-r.depth/2,r.depth,'z'));
   if(r.id==='lounge')parts.push(opening(10.65,3.6,1.2,'x'));
  }
  parts.push(rect(ARCH.courtyard,'#b7c5a4'),label(11.25,8,'FAMILY COURT',.42),label(11.25,7,'4.5 × 5 m',.42));
- if(floor){for(const [name,r] of [['WEST LOGGIA',ENVELOPE.westLoggia],['EAST LOGGIA',ENVELOPE.eastLoggia]] as const)parts.push(rect(r,'#d3c3a5'),label(r.x,r.z,name,.28));for(const face of sideWalls)for(const o of face.openings)if(o.door)parts.push(opening(face.x,o.at-o.width/2,o.width,'z'));parts.push(rect(ARCH.livingVoid,'#cfdddd'),label(4.5,6,'DOUBLE-HEIGHT VOID',.6),label(4.5,12,'FURNISHED OVERLOOK',.48),rect(ARCH.wardrobe,'#cbbda2'),label(ARCH.wardrobe.x,ARCH.wardrobe.z,'WALK-IN CLOSET',.42),rect(ARCH.rearTerrace,'#d3c3a5'),label(4.5,17,'RECESSED GARDEN TERRACE',.44));for(const b of balconies)parts.push(rect(b,'#d3c3a5'),label(b.x,b.z,'BALCONY',.45));}
+ if(floor){for(const [name,r] of [['WEST LOGGIA',ENVELOPE.westLoggia],['EAST LOGGIA',ENVELOPE.eastLoggia]] as const)parts.push(rect(r,'#d3c3a5'),label(r.x,r.z,name,.28));for(const face of sideWalls)for(const o of face.openings)if(o.door)parts.push(opening(face.x,o.at-o.width/2,o.width,'z'));parts.push(rect(ARCH.livingVoid,'#cfdddd'),label(3.25,8,'DOUBLE-HEIGHT',.45),label(3.25,7.2,'LIVING VOID',.45),label(4.5,17,'REAR OVERLOOK',.4),label(7.7,8,'GALLERY',.3),rect(ARCH.wardrobe,'#cbbda2'),label(ARCH.wardrobe.x,ARCH.wardrobe.z,'WALK-IN CLOSET',.42),rect(ARCH.rearTerrace,'#d3c3a5'),label(4.5,19,'GARDEN TERRACE',.4));for(const b of balconies)parts.push(rect(b,'#d3c3a5'),label(b.x,b.z,'BALCONY',.45));}
  else{
-  parts.push(label(4.5,6,'DOUBLE-HEIGHT LIVING',.57),label(4.5,15.5,'DINING',.65),label(4.5,-2,'FOYER',.55),rect(ARCH.pantry,'#cfc6b4'),label(ARCH.pantry.x,ARCH.pantry.z,'PANTRY',.42),rect(ARCH.powder,'#dae5e3'),label(ARCH.powder.x,ARCH.powder.z,'WC',.4));
-  parts.push(`<path d="M 5.5 10.4 L 5.5 -2 L 6.5 -2 L 6.5 -18 M 6.5 -11.3 H 12" fill="none" stroke="#986e3e" stroke-width=".12" stroke-dasharray=".3 .2"/>`);
+  parts.push(label(3.25,7,'DOUBLE-HEIGHT LIVING',.45),label(SOCIAL.dining.x,18.8,'DINING',.45),label(4.5,-2,'FOYER',.55),rect(ARCH.pantry,'#cfc6b4'),label(ARCH.pantry.x,ARCH.pantry.z,'PANTRY',.42),rect(ARCH.powder,'#dae5e3'),label(ARCH.powder.x,ARCH.powder.z,'WC',.4));
+  for(const [r,fill] of [[SOCIAL.reading,'#d4cbb8'],[SOCIAL.rug,'#d4cbb8'],[SOCIAL.sofa,'#eee9df'],[SOCIAL.chaise,'#eee9df'],[SOCIAL.coffee,'#9b8062'],[SOCIAL.dining,'#9b8062'],[SOCIAL.island,'#f5f2eb']] as const)parts.push(rect(r,fill));
+  for(const x of [SOCIAL.reading.x-.95,SOCIAL.reading.x+.95])parts.push(rect({x,z:SOCIAL.reading.z-.3,w:.95,d:1.1},'#eee9df'));
+  for(const seat of [...diningSeats,...islandSeats]){const p=seatPosition(seat);parts.push(rect({...p,w:.55,d:.55},'#b2a58f'));}
+  parts.push(rect({x:.25,z:SOCIAL.media.z,w:.3,d:SOCIAL.media.width},'#a69781'),label(SOCIAL.island.x,SOCIAL.island.z,'4.4 m',.32));
+  for(const name of ['arrival','kitchen','garden','court'])parts.push(`<polyline points="${SOCIAL.routes[name].map(([x,z])=>`${x},${-z}`).join(' ')}" fill="none" stroke="#986e3e" stroke-width=".1" stroke-dasharray=".3 .2"/>`);
  }
  // Major partitions and openings clarify the protected private hall and open social plan.
- parts.push(rect(bounds(-.12,.12,floor?1:-5,20),'#918d83','#918d83',0),opening(0,floor?11.45:13.35,1.5,'z'));
- if(floor){parts.push(opening(-7,12.15,1.3,'z'),opening(4.6,14,2.4,'x'),label(11.25,4.25,'COURT ALCOVE',.25));for(const b of balconies)parts.push(opening(b.x+(b.x<0?2:-2)-1.1,20,2.2,'x'));}
+ parts.push(rect(bounds(-.12,.12,floor?1:-5,20),'#918d83','#918d83',0),opening(0,floor?16.35:16.55,1.5,'z'));
+ if(floor){parts.push(opening(-7,12.15,1.3,'z'),opening(4.6,18,2.4,'x'),label(11.25,4.25,'COURT ALCOVE',.25));for(const b of balconies)parts.push(opening(b.x+(b.x<0?2:-2)-1.1,20,2.2,'x'));}
  else parts.push(opening(ENVELOPE.foyerPortal.x,ENVELOPE.foyerPortal.z-ENVELOPE.foyerPortal.width/2,ENVELOPE.foyerPortal.width,'z'),rect(bounds(-2,0,2.58,2.82),'#918d83','#918d83',0),opening(-1.7,2.7,1.4,'x'),opening(14.35,16.5,1.2,'x'),opening(-9.5,-4.55,1.1,'z'),opening(9,5.7,1.6,'z'),opening(10,10,1.6,'x'),opening(SITE.entrance.x-SITE.entrance.width/2,SITE.entrance.z,SITE.entrance.width,'x'),opening(5.3,20,2.4,'x'));
  if(!floor){const s=approachStairs[0];parts.push(rect(SITE.veranda,'#d3c3a5'),rect(s,'#d3c3a5'));for(let i=1;i<s.steps;i++)parts.push(`<path d="M ${s.x-s.w/2} ${-(s.z-s.d/2+i*s.d/s.steps)} h ${s.w}" stroke="#827c71" stroke-width=".06"/>`);}
  else {for(const r of [SITE.frontBalcony,SITE.leftBalcony])parts.push(rect(r,'#d3c3a5'),label(r.x,r.z,'BALCONY',.4));parts.push(opening(4.2,-3,2.6,'x'),opening(-8,-3,1.4,'x'));}

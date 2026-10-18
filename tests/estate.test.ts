@@ -5,6 +5,7 @@ import {Scene} from '@babylonjs/core/scene';
 import {Vector3} from '@babylonjs/core/Maths/math.vector';
 import {createWorld} from '../src/world';
 import {rooms,roomRect,ensuiteRect,SITE_SIDE,ACRE_M2,STOREY,LEVEL,ARCH,SITE,approachStairs,groundPlates,upperPlates,roofPlates,stairs,stairPoint,groundHeight,blocked,destinations} from '../src/plan';
+import {SOCIAL,diningSeats,islandSeats,occupiedSeat} from '../src/interiorPlan';
 import {ENVELOPE,sideWalls} from '../src/facades';
 function fixture(){const engine=new NullEngine(),scene=new Scene(engine),world=createWorld(scene,true);return {world,scene,done(){scene.dispose();engine.dispose();}};}
 function openAll(w:ReturnType<typeof createWorld>){for(const d of w.doors)d.open=true;for(let i=0;i<80;i++)w.update(.05,new Vector3());}
@@ -18,8 +19,8 @@ test('floor plates never overlap; indoor finished elevations and true voids are 
  for(const plates of [groundPlates,upperPlates,roofPlates])for(let i=0;i<plates.length;i++)for(let j=i+1;j<plates.length;j++){
   const a=plates[i],b=plates[j];const x=Math.min(a.x+a.w/2,b.x+b.w/2)-Math.max(a.x-a.w/2,b.x-b.w/2),z=Math.min(a.z+a.d/2,b.z+b.d/2)-Math.max(a.z-a.d/2,b.z-b.d/2);assert.ok(x<1e-6||z<1e-6,'no coplanar floor overlap');
  }
- const f=fixture(),w=f.world;assert.equal(groundHeight(4,6,STOREY,w.surfaces),0);assert.equal(groundHeight(11,7,LEVEL.roof,w.surfaces),0);assert.equal(groundHeight(4,12,STOREY,w.surfaces),STOREY);
- assert.equal(blocked(4,11,STOREY,w.obstacles),true);assert.equal(w.surfaces.some(s=>s.name?.includes('finish')),false);
+ const f=fixture(),w=f.world;assert.equal(groundHeight(4,6,STOREY,w.surfaces),0);assert.equal(groundHeight(11,7,LEVEL.roof,w.surfaces),0);assert.equal(groundHeight(4,17,STOREY,w.surfaces),STOREY);
+ assert.equal(blocked(4,16,STOREY,w.obstacles),true);assert.equal(w.surfaces.some(s=>s.name?.includes('finish')),false);
  assert.ok(f.scene.meshes.length<1500);f.done();
 });
 test('every door opens a clear passage with continuous support',()=>{
@@ -34,8 +35,9 @@ test('every door opens a clear passage with continuous support',()=>{
 });
 test('direct social route stays level and clear of courtyard, island, dining and media furniture',()=>{
  const f=fixture(),w=f.world;openAll(w);
- const route=[[5.5,-7],[5.5,2],[6.5,2],[6.5,11.3],[12,11.3],[6.5,11.3],[6.5,21]];
+ for(const route of Object.values(SOCIAL.routes)){
  for(let i=1;i<route.length;i++){const a=route[i-1],b=route[i],n=Math.ceil(Math.hypot(b[0]-a[0],b[1]-a[1])/.05);for(let k=0;k<=n;k++){const x=a[0]+(b[0]-a[0])*k/n,z=a[1]+(b[1]-a[1])*k/n;assert.equal(blocked(x,z,LEVEL.ground,w.obstacles),false,`social route ${x},${z}`);assert.ok(Math.abs(groundHeight(x,z,0,w.surfaces))<.001,`flat finished floor ${x},${z}`);}}
+ }
  f.done();
 });
 test('return stair flights and intermediate landings connect all three levels in both directions',()=>{
@@ -56,7 +58,7 @@ test('all destinations, private rooms, baths, closet, pantry, galleries and terr
   const reach=(x:number,z:number,name:string)=>assert.ok(seen.has(cell(x,z)),`${name} disconnected at ${x},${z}, floor ${level}`);
   for(const r of rooms.filter(r=>r.floor===level)){const e=r.entry;reach(e.x+(e.along==='x'?e.width/2:Math.sign(r.x)*.6),e.z+(e.along==='z'?e.width/2:.6),r.name);if(r.ensuite){const b=ensuiteRect(r);reach(b.x-.25,b.z-.8,r.name+' bath');}}
   if(!level){reach(10,7,'courtyard');reach(15,17.5,'pantry');reach(-10.5,-4,'powder');}
-  if(level===1){reach(5.5,-5.7,'entrance balcony');reach(-9,-5,'left balcony');reach(-11.5,5.6,'west loggia');reach(15.6,.5,'east loggia');reach(11.25,4.25,'courtyard viewing alcove');reach(4.5,12,'overlook');reach(-8.5,12.8,'closet');reach(6.5,17,'garden terrace');reach(-4,21,'primary balcony');reach(11,21,'east balcony');}
+  if(level===1){reach(5.5,-5.7,'entrance balcony');reach(-9,-5,'left balcony');reach(-11.5,5.6,'west loggia');reach(15.6,.5,'east loggia');reach(11.25,4.25,'courtyard viewing alcove');reach(4.5,17,'overlook');reach(-8.5,12.8,'closet');reach(6.5,19,'garden terrace');reach(-4,21,'primary balcony');reach(11,21,'east balcony');}
   if(level===2){reach(4,8,'roof');reach(11,13,'pergola');}
  }
  w.setNight(true);assert.equal(w.sun.intensity,.18);w.setNight(false);assert.equal(w.sun.intensity,1.15);w.zones[0].on=false;w.update(.05,new Vector3());assert.ok(w.zones.filter(z=>z.light.isEnabled()).length<=4);assert.equal(w.zones[0].light.isEnabled(),false);f.done();
@@ -104,4 +106,29 @@ test('raised arrival and garden stairs meet the interior smoothly; three garage 
  assert.ok(SITE.garage.d>SITE.garage.w);assert.ok(SITE.garageDoorX-17>=4,'detached garage gap');
  for(let x=-18;x<12;x+=1)for(let z=-27;z<-11;z+=1){assert.equal(blocked(x,z,LEVEL.site,w.obstacles),false,'open forecourt');const supports=w.surfaces.filter(s=>Math.abs(s.y-LEVEL.site)<.001&&Math.abs(x-s.x)<s.w/2-.001&&Math.abs(z-s.z)<s.d/2-.001);assert.equal(supports.length,1,'single arrival surface');}
  assert.equal(w.obstacles.some(o=>/roundabout|island curb/i.test(o.name)),false);f.done();
+});
+
+
+test('social layout keeps occupied seating, working aisle and genuine ceiling-height living clear',()=>{
+ const f=fixture(),w=f.world;openAll(w);
+ const occupied=[...diningSeats,...islandSeats].map(s=>({...occupiedSeat(s),name:'Occupied seating with 450 mm pullback',bottom:0,top:1.2}));
+ const appliances={name:'Open appliance doors',x:15.48,z:15.45,w:.6,d:1.7,bottom:0,top:2};
+ for(const name of ['arrival','kitchen','garden','islandRear']){
+  const route=SOCIAL.routes[name];for(let i=1;i<route.length;i++){
+   const a=route[i-1],b=route[i],steps=Math.ceil(Math.hypot(b[0]-a[0],b[1]-a[1])/.05);
+   for(let k=0;k<=steps;k++){const x=a[0]+(b[0]-a[0])*k/steps,z=a[1]+(b[1]-a[1])*k/steps;assert.equal(blocked(x,z,0,[...w.obstacles,...occupied,appliances]),false,`${name} with occupied seating at ${x},${z}`);}
+  }
+ }
+ assert.equal(diningSeats.length,10);assert.equal(islandSeats.length,5);
+ assert.ok(SOCIAL.sofa.x<SOCIAL.dining.x&&SOCIAL.dining.x<SOCIAL.island.x);
+ assert.ok(SOCIAL.island.d>=4&&SOCIAL.island.d<=4.5&&SOCIAL.island.w>=1.2&&SOCIAL.island.w<=1.4);
+ // Standing near the island sees the table and living furniture without a partition.
+ for(const target of [[8.3,14.25],[4.7,12.3]])for(let t=0;t<=1;t+=.01){const x=11+(target[0]-11)*t,z=16+(target[1]-16)*t;assert.equal(w.obstacles.some(o=>x>o.x-o.w/2&&x<o.x+o.w/2&&z>o.z-o.d/2&&z<o.z+o.d/2&&o.bottom<LEVEL.eye&&o.top>LEVEL.eye),false,'island social sightline');}
+ assert.equal(SOCIAL.ceiling,LEVEL.roof-LEVEL.slabThickness);
+ for(const z of [3,8,12,15])assert.equal(groundHeight(3,z,LEVEL.upper,w.surfaces),0,'extended genuine living void');
+ for(const z of [3,8,12,15]){assert.equal(blocked(6.5,z,LEVEL.upper,w.obstacles),true,'side void guard');assert.equal(groundHeight(7.7,z,LEVEL.upper,w.surfaces),LEVEL.upper,'gallery support');}
+ assert.ok(SOCIAL.chandelier.lowest>3&&SOCIAL.chandelier.lowest>SOCIAL.media.tvCentre+SOCIAL.media.tvHeight/2);
+ assert.ok(SOCIAL.chandelier.x+SOCIAL.chandelier.width/2<ARCH.livingVoid.x+ARCH.livingVoid.w/2-.8);
+ w.setNight(true);w.update(.05,new Vector3(5.9,0,12));assert.ok(w.zones.filter(z=>z.light.isEnabled()).length<=4);
+ f.done();
 });

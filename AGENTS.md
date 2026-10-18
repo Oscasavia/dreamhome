@@ -10,6 +10,8 @@ Exterior composition is authored in `src/facades.ts`; do not restore automatic i
 
 The approved ivory-mansion image now controls the front. Preserve the raised veranda (interior 0 m, site −0.75 m), five shallow approach steps, open paved forecourt and detached garage at X 21–30 / Z −18 to −6. All three garage doors face west: cars enter along +X. Do not restore any roundabout. `SITE`, `FRONT` and `approachStairs` define these assumptions. Repeated foliage uses thin instances; exclude those meshes from static merging. Textures must explicitly repeat rather than clamp metre-based UVs.
 
+The social interior now uses `SOCIAL` in `src/interiorPlan.ts` and reusable furniture/material components in `src/interior.ts`. Preserve the living → dining → island relationship, 4.4 m waterfall island, full-height media finish and true roof-suspended chandelier. The living void is 6.5 × 15 m, with a 2.5 m east gallery and 9 × 2 m rear overlook; the central garden terrace is now 2 m deep. Update physical geometry, door positions, destinations, diagrams and occupied-seat clearance checks together. The court and return stair remain in place; the latest user explicitly permits moving interior elements and modest exterior changes when needed for the priorities.
+
 ## Workflow
 
 - This is a Babylon.js + TypeScript + Vite browser application. Do not replace it with React, a database, a static rendered image, or a Godot project without a user request.
@@ -26,6 +28,6 @@ The approved ivory-mansion image now controls the front. Preserve the raised ver
 
 ## Next visual refinement
 
-This first implementation uses procedural architecture and simplified furniture. For greater realism, retain the layout while replacing key furnishings with licensed, optimized GLB assets, adding carefully authored materials and baked lighting. Keep an editable source for each model. Test performance on the M4 MacBook Air (16 GB), especially with Retina scaling and night lighting. Maintain quality presets.
+The implementation uses procedural architecture and furniture, with more detailed social-space furnishings. For greater realism, retain the layout while replacing key furnishings with licensed, optimized GLB assets, adding carefully authored materials and baked lighting. Keep an editable source for each model. Test performance on the M4 MacBook Air (16 GB), especially with Retina scaling and night lighting. Maintain quality presets.
 
 Known limitations are documented in README.md. Do not erase them until verified fixes exist.

@@ -1,0 +1,104 @@
+{
+  "phase": "interior",
+  "views": [
+    [
+      "foyer-entry",
+      "foyer"
+    ],
+    [
+      "full-height-media",
+      "media"
+    ],
+    [
+      "social-sequence",
+      "social"
+    ],
+    [
+      "island-front",
+      "island"
+    ],
+    [
+      "upper-overlook",
+      "overlook"
+    ],
+    [
+      "courtyard",
+      "court"
+    ],
+    [
+      "courtyard-upper",
+      "courtSky"
+    ],
+    [
+      "front-preserved",
+      "approved"
+    ],
+    [
+      "rear-adjusted",
+      "rear"
+    ]
+  ],
+  "overrides": {
+    "rear-adjusted": {
+      "eye": [
+        5,
+        2,
+        30
+      ],
+      "target": [
+        4.5,
+        4,
+        18
+      ]
+    },
+    "island-rear": {
+      "eye": [
+        11,
+        1.65,
+        18.2
+      ],
+      "target": [
+        13.4,
+        1,
+        13.6
+      ]
+    }
+  },
+  "source": "actual Babylon.js WebGL application; procedural geometry",
+  "performance": [
+    {
+      "preset": "balanced",
+      "dpr": 1,
+      "night": false,
+      "medianFrameMs": 16.69999998807907,
+      "p95FrameMs": 18.30000001192093,
+      "renderWidth": 1536,
+      "renderHeight": 1024,
+      "meshes": 656,
+      "activeLocalLights": 4
+    },
+    {
+      "preset": "balanced",
+      "dpr": 1,
+      "night": true,
+      "medianFrameMs": 16.600000023841858,
+      "p95FrameMs": 17.900000035762787,
+      "renderWidth": 1536,
+      "renderHeight": 1024,
+      "meshes": 656,
+      "activeLocalLights": 4
+    },
+    {
+      "preset": "high",
+      "dpr": 2,
+      "night": true,
+      "medianFrameMs": 16.69999998807907,
+      "p95FrameMs": 17.899999976158142,
+      "renderWidth": 3072,
+      "renderHeight": 2048,
+      "meshes": 656,
+      "activeLocalLights": 4
+    }
+  ],
+  "errors": []
+}

@@ -12,6 +12,8 @@ import {PointLight} from '@babylonjs/core/Lights/pointLight';
 import {ShadowGenerator} from '@babylonjs/core/Lights/Shadows/shadowGenerator';
 import {surfaceTexture} from './surfaceTextures';
 import {createLandscape} from './landscape';
+import {socialMaterials,furnishSocial} from './interior';
+import {SOCIAL} from './interiorPlan';
 import {rooms, SITE_SIDE, STOREY, LEVEL, ARCH, SITE, stairs, approachStairs, disjoint, stairLandings, stairPoint, groundPlates, upperPlates, roofPlates, balconies, outline, roomRect, roomEntry, ensuiteRect, type Rect, type Room, type Obstacle, type Surface} from './plan';
 
 import {ENVELOPE,FRONT,sideWalls} from './facades';
@@ -30,6 +32,7 @@ export function createWorld(scene:Scene, headless=false):World {
  scene.clearColor=Color4.FromHexString('#cbdde5ff');scene.fogMode=Scene.FOGMODE_EXP2;scene.fogDensity=.0028;scene.fogColor=Color3.FromHexString('#cbdde5');
  const mat=(name:string,hex:string,spec=.035)=>{const m=new StandardMaterial(name,scene);m.diffuseColor=Color3.FromHexString(hex);m.specularColor=new Color3(spec,spec,spec);m.specularPower=48;return m;};
  const plaster=mat('Warm ivory plaster','#eee7d7'),stone=mat('Pale travertine','#d9c7a7'),dark=mat('Dark bronze','#332c25'),wood=mat('Walnut','#624125'),floor=mat('Honed limestone floor','#bcb9b0',.06),oak=mat('Natural oak floor','#a5835e'),grass=mat('Garden lawn','#69764c'),asphalt=mat('Stone pavers','#a89b83'),water=mat('Pool water','#52a6a4',.8),white=mat('Ivory upholstery','#eee8db'),cloth=mat('Sage upholstery','#818d7c'),black=mat('Cinema charcoal','#242626'),leaf=mat('Olive canopy','#354b32',.02),brass=mat('Brushed brass','#b6a170',.5),soil=mat('Planting earth','#615343');
+ const interior=socialMaterials(scene,headless);
  water.alpha=.85;water.specularPower=128;
  const entryWood=mat('Dark walnut entry doors','#30251b');
  const glass=mat('Smoked architectural glazing','#9eb9b5',.65);glass.alpha=.25;glass.backFaceCulling=false;
@@ -47,8 +50,8 @@ export function createWorld(scene:Scene, headless=false):World {
   if(solid){obstacles.push({name,x,z,w,d,bottom:y-h/2,top:y+h/2});b.isPickable=true;b.metadata={solid:true};}if(shadow&&m!==glass)shadows.addShadowCaster(b);return b;
  }
  function cylinder(name:string,x:number,y:number,z:number,d:number,h:number,m:StandardMaterial,top=d){const b=MeshBuilder.CreateCylinder(name,{diameterBottom:d,diameterTop:top,height:h,tessellation:16},scene);b.position.set(x,y,z);b.material=m;b.isPickable=false;b.receiveShadows=true;return b;}
- function slab(name:string,x:number,z:number,w:number,d:number,y:number,m=floor){box(name,x,y-.12,z,w,.24,d,m,false,y>=STOREY);surfaces.push({name,x,z,w,d,y});}
- function panel(name:string,x:number,z:number,w:number,d:number,base:number,h=3.95,m=plaster){if(base+h<=LEVEL.roof+.001&&base+h>0&&Math.abs((base+h)/STOREY-Math.round((base+h)/STOREY))<.0001)h-=.24;return box(name,x,base+h/2,z,w,h,d,m,true,true);}
+ function slab(name:string,x:number,z:number,w:number,d:number,y:number,m=floor){box(name,x,y-LEVEL.slabThickness/2,z,w,LEVEL.slabThickness,d,m,false,y>=STOREY);surfaces.push({name,x,z,w,d,y});}
+ function panel(name:string,x:number,z:number,w:number,d:number,base:number,h=3.95,m=plaster){if(base+h<=LEVEL.roof+.001&&base+h>0&&Math.abs((base+h)/STOREY-Math.round((base+h)/STOREY))<.0001)h-=LEVEL.slabThickness;return box(name,x,base+h/2,z,w,h,d,m,true,true);}
  function zone(name:string,x:number,y:number,z:number,w:number,d:number,ceiling=true){
   const lm=mat(name+' LEDs','#fff1c8');lm.emissiveColor=Color3.FromHexString('#ffdc99');lm.disableLighting=true;
   const strips=ceiling?[box(name+' cove west',x-w/2+.32,y+3.72,z,.025,.018,d-.64,lm),box(name+' cove east',x+w/2-.32,y+3.72,z,.025,.018,d-.64,lm),box(name+' cove north',x,y+3.72,z+d/2-.32,w-.64,.018,.025,lm),box(name+' cove south',x,y+3.72,z-d/2+.32,w-.64,.018,.025,lm)]:[];
@@ -125,7 +128,6 @@ export function createWorld(scene:Scene, headless=false):World {
   if(r.kind==='office'){table(r.x,y,r.z,2.6,1.2);sofa(r.x,y,r.z+1.8);box('Bookshelf',r.x,y+1.4,r.z+2.65,4,2.8,.5,wood);for(let i=0;i<3;i++)box('Bookshelf shelf',r.x,y+.4+i*.8,r.z+2.35,3.8,.05,.6,dark);box('Desk monitor',r.x,y+1.2,r.z+.25,1,.65,.05,dark);}
   if(r.kind==='gym'){for(let i=0;i<1;i++){box('Treadmill deck',r.x-.35+i*2.6,y+.15,r.z,1.1,.3,2.1,dark);box('Treadmill upright',r.x-.35+i*2.6,y+.8,r.z+.8,.1,1.3,.1,dark);box('Treadmill console',r.x-.35+i*2.6,y+1.4,r.z+.8,.75,.12,.35,black);}box('Exercise mat',r.x,y+.03,r.z+2.2,2,.04,1,cloth);box('Gym mirror',r.x,y+1.7,r.z-r.depth/2+.15,3,2.3,.03,glass);}
   if(r.kind==='cinema'){box('Cinema carpet',r.x,y+.02,r.z,r.width-.3,.03,r.depth-.3,black);box('Cinema screen frame',r.x+3.8,y+1.9,r.z,.12,2.7,5.2,dark);const screen=mat('Projection surface','#9aaeb3');screen.emissiveColor=new Color3(.13,.18,.2);box('Projection screen',r.x+3.72,y+1.9,r.z,.02,2.35,4.8,screen);sofa(r.x+.8,y,r.z+1,-Math.PI/2,black);sofa(r.x-1.8,y,r.z+1,-Math.PI/2,black);}
-  if(r.kind==='kitchen'){box('Kitchen island',r.x,y+.5,r.z,4,1,1.6,wood,true);box('Island waterfall top',r.x,y+1.06,r.z,4.2,.12,1.8,white);for(const x of [r.x-2.04,r.x+2.04])box('Waterfall stone end',x,y+.53,r.z,.12,1.06,1.8,white);for(const x of [r.x-1.25,r.x,r.x+1.25]){cylinder('Island stool',x,y+.7,r.z-1.35,.48,.13,cloth);cylinder('Stool stem',x,y+.35,r.z-1.35,.055,.65,dark);}box('Island sink',r.x+.8,y+1.125,r.z,.7,.025,.55,dark);box('Kitchen cabinets',r.x+r.width/2-.5,y+.5,r.z,.8,1,6,wood,true);box('Kitchen counter',r.x+r.width/2-.55,y+1.06,r.z,.95,.12,6,white);box('Tall fridge',r.x+r.width/2-.6,y+1.3,r.z-2.7,1.1,2.6,1.2,dark,true);table(r.x,y,r.z+2.7,2.5,1.2);}
   if(r.kind==='lounge'){sofa(r.x,y,r.z+1);table(r.x,y-.3,r.z-1,1.8,1);}
   plant(r.x+Math.sign(r.x)*(r.width/2-1),y,r.z-r.depth/2+1,.85);
  }
@@ -144,7 +146,9 @@ export function createWorld(scene:Scene, headless=false):World {
  // One finished datum; disjoint plates eliminate overlapping floor tops and false steps.
  const exterior=mat('Concealed warm light','#ffe0a3');exterior.disableLighting=true;exterior.emissiveColor=Color3.FromHexString('#ffe0a3');
  const plate=(name:string,r:Rect,y:number,m=floor)=>slab(name,r.x,r.z,r.w,r.d,y,m);
- for(const [level,plates] of [[0,groundPlates],[1,upperPlates],[2,roofPlates]] as const)for(const r of plates)plate('Continuous floor '+level,r,level*STOREY,level===2?stone:floor);
+ for(const r of disjoint(groundPlates,SOCIAL.floorAreas))plate('Continuous floor 0',r,LEVEL.ground);
+ for(const r of SOCIAL.floorAreas)plate('Continuous social porcelain floor',r,LEVEL.ground,interior.porcelain);
+ for(const [level,plates] of [[1,upperPlates],[2,roofPlates]] as const)for(const r of plates)plate('Continuous floor '+level,r,level*STOREY,level===2?stone:floor);
  for(const e of outline(groundPlates)){const atSteps=Math.abs(e.z+8)<.001&&e.x>.5&&e.x<9;box('Raised house plinth',e.x,grade/2,e.z,e.w,-grade,e.d,stone,!atSteps,true);}
  for(const landing of stairLandings)plate('Return stair landing',landing,landing.y,stone);
  // Wall faces use one opening component for walls, windows and working doors.
@@ -236,8 +240,8 @@ export function createWorld(scene:Scene, headless=false):World {
  // Privacy begins beyond the stair: the foyer can see the flights without a corridor door.
  passage('Bedroom hall privacy',-1,2.7,2,'x',0,0,1.4,wood,true);
  for(const f of [0,1]){
-  panel('Living media spine',0,6,.3,10,f*STOREY,STOREY,stone);
-  passage(f?'Upper private gallery':'Garden private hall',0,15.5,9,'z',f*STOREY,f?-3.3:-1.4,1.5);
+  panel('Living media spine',0,ARCH.livingVoid.z,.3,ARCH.livingVoid.d,f*STOREY,STOREY,stone);
+  passage(f?'Upper private gallery':'Garden private hall',0,18,4,'z',f*STOREY,f?-.9:-.7,1.5);
   panel('West hall garden end',-1,20,2,.24,f*STOREY,STOREY);
  }
  // Enclosed kitchen and pantry, with the whole west edge open to dining.
@@ -248,12 +252,6 @@ export function createWorld(scene:Scene, headless=false):World {
  panel('Pantry back',pantry.x,pantry.z+pantry.d/2,pantry.w,.16,0,3.8);
  passage('Enclosed pantry',pantry.x,pantry.z-pantry.d/2,pantry.w,'x',0,-.25,1.2);
  for(const z of [17.2,18.2,19.2])box('Pantry shelving',16.3,1.3,z,.6,2.6,.8,wood,true);
- box('Kitchen island',13,.48,13.2,4,.96,1.6,wood,true);box('Island waterfall top',13,1.02,13.2,4.2,.12,1.8,white);
- for(const x of [10.96,15.04])box('Waterfall end',x,.51,13.2,.12,1.02,1.8,white,true);
- box('Inset sink',13.8,1.085,13.2,.7,.015,.55,dark);
- for(const x of [11.6,13,14.4]){cylinder('Island stool',x,.68,14.7,.5,.15,cloth);cylinder('Stool stem',x,.32,14.7,.06,.6,dark);}
- box('Kitchen worktop cabinets',16.45,.48,12.8,.8,.96,4.4,wood,true);box('Kitchen worktop',16.4,1.02,12.8,.9,.12,4.4,white);box('Refrigerator',16.2,1.35,15.5,1.2,2.7,1.1,dark,true);
- zone('Kitchen',13,0,13.2,7.4,5.8);
  // A discrete powder room reached from the front private vestibule, away from dining.
  const powder=ARCH.powder;
  panel('Powder west',powder.x-powder.w/2,powder.z,.16,powder.d,0,3.5);
@@ -280,21 +278,21 @@ export function createWorld(scene:Scene, headless=false):World {
  for(const z of [5.18,9.82])box('Courtyard slot drain',11.25,.001,z,4.14,.006,.035,dark);
  sofa(11.5,0,5.9,Math.PI);sofa(12.85,0,8.3,Math.PI/2);table(11.5,-.35,7.7,1.15,.8);plant(9.6,0,9.4,.8);
  // Courtyard furniture stays outside the two threshold paths.
- // Main social sequence: foyer → living → dining, with kitchen visible immediately at the right.
+ // Living, dining and kitchen share one continuous finished floor and a clear rear social axis.
  zone('Foyer',4.5,0,-2,8.6,5.6);
- const livingLight=zone('Double-height living',4.5,STOREY,6,8.6,9.6);livingLight.position.y=1;livingLight.light.position.y=6.5;livingLight.light.range=16;
- zone('Dining',4.5,0,15.5,8.6,8.6);
- box('Living rug',4.1,.009,6,5.8,.008,6,white);
- sofa(4.7,0,6,Math.PI/2);sofa(2.8,0,9.1,0);table(2.7,-.35,6.3,1.6,1.2);
- box('Media stone plane',.2,2.1,6,.2,3.8,5.8,stone);box('Floating media console',.55,.48,6,.65,.45,5,wood,true);box('Media screen',.34,1.95,6,.08,1.75,3.1,black);
- for(const z of [3.1,8.9])box('Media concealed reveal',.32,2.15,z,.025,3.7,.035,exterior);
- table(3.3,0,15.5,2.4,3.6);for(const z of [14.3,15.5,16.7])for(const x of [1.65,4.95])box('Dining chair',x,.48,z,.55,.9,.55,cloth);
- // Upper gallery is a furnished room-width destination, connected to both wings and the stair.
- for(const z of [1,11])panel('Living overlook guard',4.5,z,9,.055,STOREY,1.1,glass);
- for(const z of [1,11])box('Overlook rail cap',4.5,STOREY+1.1,z,9,.045,.065,dark);
- panel('East living void guard',9,3,.055,4,STOREY,1.1,glass);
- sofa(3,STOREY,13.05,0);table(5.4,STOREY-.35,12.7,1.2,.7);zone('Living overlook gallery',4.5,STOREY,12.5,8.6,2.6);
- glazedPassage('Upper garden terrace',4.5,14,9,'x',STOREY,1.3,2.4);
+ furnishSocial({scene,obstacles,box,cylinder,zone,castShadow:mesh=>shadows.addShadowCaster(mesh)},interior);
+ // A side gallery connects the front landing to a guarded rear overlook.
+ const voidRect=ARCH.livingVoid;
+ for(const z of [voidRect.z-voidRect.d/2,voidRect.z+voidRect.d/2]){
+  panel('Living overlook guard',voidRect.x,z,voidRect.w,.055,STOREY,1.1,glass);
+  box('Overlook rail cap',voidRect.x,STOREY+1.1,z,voidRect.w,.045,.065,dark);
+ }
+ const galleryEdge=voidRect.x+voidRect.w/2;
+ panel('East living void guard',galleryEdge,voidRect.z,.055,voidRect.d,STOREY,1.1,glass);
+ box('East overlook rail cap',galleryEdge,STOREY+1.1,voidRect.z,.065,.045,voidRect.d,dark);
+ sofa(2,STOREY,-.8,0);
+ zone('Living overlook gallery',ARCH.overlook.x,STOREY,ARCH.overlook.z,8.6,1.6);
+ glazedPassage('Upper garden terrace',4.5,ARCH.rearTerrace.z-ARCH.rearTerrace.d/2,9,'x',STOREY,1.3,2.4);
 
  // Approved front: carved travertine left wing, dark light slot, walnut-lined ivory entrance.
  const left=FRONT.left,frame=FRONT.frame,entry=SITE.entrance;
@@ -397,10 +395,10 @@ export function createWorld(scene:Scene, headless=false):World {
   box('Balcony concealed rear light',b.x,7.9,b.z-b.d/2+.24,b.w-.9,.025,.025,exterior);sofa(b.x,STOREY,b.z,Math.PI);
  }
  panel('Upper garden terrace guard',4.5,20,9,.06,STOREY,1.1,glass);
- for(const x of [0,9])panel('Garden terrace side',x,17,.06,6,STOREY,1.1,glass);
+ for(const x of [0,9])panel('Garden terrace side',x,ARCH.rearTerrace.z,.06,ARCH.rearTerrace.d,STOREY,1.1,glass);
  for(const x of [.2,8.8])panel('Garden portico support',x,19.8,.3,.3,0,8.4,stone);
  box('Garden portico deep lintel',4.5,8.35,19.6,9.6,.55,1.4,plaster,true,true);
- sofa(3,STOREY,18,Math.PI);plant(7.8,STOREY,18.8,.8);
+ sofa(3,STOREY,19.3,Math.PI);plant(7.8,STOREY,19.3,.8);
  for(const e of outline(roofPlates)){
   const stairEdge=e.x>=-6.01&&e.x<=-2&&e.z>=-3.61&&e.z<=2.41;
   const frontFrame=e.z<-3&&(e.x<-2.2||e.x>=0&&e.x<9.6);

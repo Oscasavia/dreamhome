@@ -6,7 +6,7 @@ The latest approved **Ivory mansion with rotated garage** image controls the fro
 
 Two residential floors retain two ground-floor ensuite bedrooms and four upstairs, including the primary, a separate primary walk-in closet, guest half-bath, study, gym, cinema, pantry, balconies, accessible roof terrace and a genuine double-height living room. The one-acre site retains a detached three-car garage, pool, gazebo, landscaping, high wall and separate gates. The square boundary is provisional, not surveyed.
 
-The front comprises an 11.2 m-wide pale travertine volume with two narrow lower windows and a 5.8 m-wide recessed upper balcony; a narrow screened dark light slot; a 9.6 m-wide, 9.5 m-high ivory entrance frame, 5 m deep, lined in walnut; an upper entrance balcony over the veranda; dark paired entrance doors; and a quieter recessed ivory east wing. These dimensions are inferred design assumptions. The original interior relationships are retained behind the new frontage.
+The front comprises an 11.2 m-wide pale travertine volume with two narrow lower windows and a 5.8 m-wide recessed upper balcony; a narrow screened dark light slot; a 9.6 m-wide, 9.5 m-high ivory entrance frame, 5 m deep, lined in walnut; an upper entrance balcony over the veranda; dark paired entrance doors; and a quieter recessed ivory east wing. These dimensions are inferred design assumptions. The current interior pass keeps this frontage while reorganizing the social volume and upper gallery behind it. The user explicitly permitted interior relocation and modest exterior changes.
 
 The open arrival court replaces **all** roundabout geometry. The detached garage has a fully rotated 9 × 12 m footprint, X 21–30 and Z −18 to −6. Its three 3.4 m-wide doors face west across an 8 m nominal apron; bays are arranged along Z with centres −16, −12 and −8. Cars enter west-to-east (+X). The short south end is solid ivory. At least 4 m separates the garage from the eastern mansion wall. South/front, north/rear, west/left and east/right refer to the approved image; true site orientation needs confirmation.
 
@@ -16,12 +16,16 @@ The exterior datum is −0.75 m. Ground/veranda/foyer remain 0 m, upper 4.2 m, r
 
 ## Plan and composition
 
-The entrance opens into a short foyer with an immediate view into the living room. Living, dining and kitchen form one connected social sequence. A clear walking aisle along the eastern side of the living furniture continues through dining to the rear terrace; the island sits beside this route. The enclosed pantry is behind the kitchen. The bedroom corridor is separated from living by the media spine and entered from the foyer or dining circulation. The guest WC is discreetly in the front private vestibule. The cinema is across the house from the west bedroom wing.
+The entrance opens into a short foyer and the full-height living volume. An arrival sitting pair occupies the front of that volume; the main lounge, dining and island align across its rear. **Dining is physically between the living seating and kitchen**, with table and island parallel. The island-facing stools look toward dining and living. The enclosed pantry remains at the back of the kitchen. Private bedroom circulation stays behind the media spine, with its rear access moved to Z 17.3 on the ground and Z 17.1 upstairs. The guest WC remains in the front private vestibule.
+
+A continuous 1.2 m-format satin ivory porcelain finish replaces the social slabs' material, with no raised finish surface. The 4.4 × 1.3 × 0.94 m island has a 55 mm marble top, coordinated waterfall ends, walnut cabinetry, recessed toe-kick and a 340 mm seating overhang with five upholstered stools. The working wall has cooking/hood, preparation space, sink at the window, oven and integrated refrigerator; the pantry remains enclosed. A 3.5 × 1.18 m walnut table seats ten under a restrained linear pendant. Clearance tests include all seats pulled back 450 mm and a 600 mm appliance-opening envelope: approximately 1.26 m between lounge and occupied dining, 1.44 m between dining and occupied stools, and 1.85 m at the main working counter (approximately 1.1 m remaining alongside open tall appliances).
+
+The main living composition uses cream upholstery, a taupe rug, a low walnut table and an 8.16 m-high feature treatment. Central marble-look slabs are approximately 1.87 × 2.04 m, separated by 12 mm shadow gaps, with selected full-height walnut banks and warm reveals. The TV centre is 1.85 m above the floor; a slim floating console and horizontal fireplace sit below it. Thirteen opal pendants descend from a 2.7 × 2.1 m bronze canopy at the true roof soffit. The lowest pendant is 3.25 m above the floor, inside the void and clear of the gallery. Pendants and coves share the living light zone; no per-pendant real-time lights are added.
 
 The **4.5 × 5 m internal court** sits beside living and kitchen. It is surrounded by building on all four sides, open through both storeys and the roof, with two glazed sliding thresholds, seating for approximately six and a small planter. Fixed sidelights separate the sheltered social route from the outdoor court. Perimeter slot drains express drainage intent; actual falls, outlets, overflow and waterproofing remain engineering work. The court is not on the entrance-to-living route.
 
-The substantial front frame and travertine wing establish the arrival hierarchy. The west rear bedroom wing steps outward two metres. The quieter side wings contain occupied recessed upper loggias. At the rear, two sheltered bedroom balconies flank a six-metre-deep carved upper terrace. Columns continue to ground; the terrace has no roof slab over it. The palette is warm ivory plaster, pale travertine, dark bronze and selective walnut. Protected courtyard and garden sides carry larger openings; the street remains substantially solid.
-The upper living overlook is a furnished, three-metre-deep gallery connected to the private hall, east bedroom and garden terrace. It looks into the **actual 9 × 10 m living void**. A guard protects each accessible floor edge. The roof above living remains intact; the upper floor below it does not.
+The substantial front frame and travertine wing establish the arrival hierarchy. The west rear bedroom wing steps outward two metres. The quieter side wings contain occupied recessed upper loggias. At the rear, two sheltered bedroom balconies flank a two-metre-deep carved upper terrace. Columns continue to ground; the terrace has no roof slab over it. The palette is warm ivory plaster, pale travertine, dark bronze and selective walnut. Protected courtyard and garden sides carry larger openings; the street remains substantially solid.
+The **actual 6.5 × 15 m living void** extends rearward to keep the main lounge beside dining and kitchen. A 2.5 m-wide eastern gallery connects the front stair landing to a 9 × 2 m rear overlook, the private bedroom hall and garden terrace. Guards protect all accessible void edges. The central rear terrace is reduced from 6 m to 2 m depth and its glazed enclosure moves rearward, allowing the roof to cover the extended living volume and gallery. Residential floor levels and roof height remain unchanged; the courtyard and stair stay in their established positions. This is the modest rear exterior adjustment made under the user’s expanded authorization.
 
 ## Exterior refinement and visible stair
 
@@ -30,11 +34,11 @@ The long elevations are authored in `src/facades.ts`, independently of the room 
 
 Exterior walls are 480 mm nominal with glazing set 220 mm inward from their centreline, giving approximately 460 mm from the outer wall face to glass. Openings respond to bedroom, bathroom, cinema and study uses. Bathroom side windows are high-level, including the one facing the private west loggia. These visual privacy measures are not certified security or ventilation specifications.
 
-The study stays on the ground floor. A **4.8 m wide, 3.65 m high framed opening** replaces the former foyer-to-private-wing door, revealing the existing return stair. The bedroom privacy door is moved across the hall beyond the stair approach. The living media spine and direct social route remain intact. General interior styling is deferred: only furniture obstructing new doors/windows was moved, and the narrower family lounge retains one sofa to keep its entrance clear.
+The study stays on the ground floor. A **4.8 m wide, 3.65 m high framed opening** replaces the former foyer-to-private-wing door, revealing the existing return stair. The bedroom privacy door is moved across the hall beyond the stair approach. The living media spine and direct social route remain intact. The foyer and social interior are now furnished in `src/interior.ts`; other rooms retain their earlier procedural furnishings. The narrower family lounge retains one sofa to keep its entrance clear.
 
 ## Named dimensions and room schedule
 
-Coordinates are metres: Y up, +Z toward the rear garden. Reference north is +Z; survey orientation is unresolved. `LEVEL`, `SITE`, `FRONT` and `ARCH` in `src/plan.ts` are the primary dimensions. Room sizes below are nominal modules, before wall/finish deductions; bedroom areas include ensuite/storage.
+Coordinates are metres: Y up, +Z toward the rear garden. Reference north is +Z; survey orientation is unresolved. `LEVEL`, `SITE` and `ARCH` in `src/plan.ts`, `FRONT` in `src/facades.ts`, and `SOCIAL` in `src/interiorPlan.ts` hold the principal dimensions. Room sizes below are nominal modules, before wall/finish deductions; bedroom areas include ensuite/storage.
 
 | Element | Nominal dimension |
 | --- | --- |
@@ -43,10 +47,12 @@ Coordinates are metres: Y up, +Z toward the rear garden. Reference north is +Z; 
 | Exterior / ground / upper / roof finished floors | −0.75 / 0 / 4.2 / 8.4 m |
 | Eye height | 1.65 m above walking support |
 | Typical interior ceiling | Approximately 3.8 m |
-| Living room and upper void | 9 × 10 m; approximately 8 m high |
-| Dining / open kitchen | 9 × 9 m / 8 × 10 m |
+| Living volume / true upper void | Ground social bay 9 × 15 m; void 6.5 × 15 m; roof soffit 8.16 m |
+| Dining / open kitchen | Open furniture zone between lounge and island / 8 × 10 m kitchen module |
 | Courtyard | 4.5 × 5 m, 22.5 m² |
-| Upper overlook | 9 × 3 m |
+| Upper overlook / side gallery | Rear 9 × 2 m / east 2.5 × 15 m |
+| Central rear terrace | 9 × 2 m, open to sky |
+| Dining table / island | 3.5 × 1.18 × 0.75 m / 4.4 × 1.3 × 0.94 m |
 | Primary dressing room | 5.7 × 3.2 m, 18.24 m², separate door and two storage banks |
 | Pantry | 3.2 × 3.3 m |
 | Ensuites | 3.1 × 3.1 m each; toilet, basin and shower |
@@ -82,13 +88,13 @@ The source uses shared wall/opening/door/slab/loggia components, metre-based rep
 
 ## Rendering diagnosis and verification scope
 
-The current review is [IVORY_REVIEW.md](IVORY_REVIEW.md). Its screenshots come from the running Babylon.js application. The approved-front camera, a separate walking-height front view, both full side elevations, rear, top, night and plain-material views are reproducible with `tooling/ivory-review.mjs`. Earlier before/after captures in `EXTERIOR_REVIEW.md` describe the previous design and remain historical records.
+The current interior review is [INTERIOR_REVIEW.md](INTERIOR_REVIEW.md). The prior exterior stage is recorded in [IVORY_REVIEW.md](IVORY_REVIEW.md). Its screenshots come from the running Babylon.js application. The approved-front camera, a separate walking-height front view, both full side elevations, rear, top, night and plain-material views are reproducible with `tooling/ivory-review.mjs`. Earlier before/after captures in `EXTERIOR_REVIEW.md` describe the previous design and remain historical records.
 
 The current pass separates lawn from paving, explicitly repeats the small authored textures, and projects box UVs in metres on each face. Travertine courses and stone pavers are intentional surface patterns; stretched texture edge pixels and overlapping floor bands are not. The pool terrace has a real opening and coping ring, keeping the water visible below deck level. Indoor plates remain disjoint, finishes remain decorative, and collision boundaries follow the actual door leaves and architectural openings.
 
 The retained directional shadow source uses a 1024-pixel map, fitted caster depth bounds, tight projection padding, back-face casting, tuned bias and medium PCF filtering. The cap of four nearest local lights and existing performance presets remain. Tropical foliage is repeated with three thin-instanced mesh buffers, opaque materials and no new foliage shadow casters. Small step, wall and garden lights share emitter materials. Fine shadow aliasing and transparent-surface ordering remain possible.
 
-Nine programmatic test groups check the six-suite schedule, court and living voids, disjoint plates, every opened doorway, flat social route, all four indoor flights and landings in both directions, loggia guards, foyer-to-stair route and connectivity to rooms, bathrooms, dressing room, pantry, balconies and rooftop. They also check both exterior flights, paired entrance leaves, garage approaches and the unobstructed single-surface forecourt. These geometry checks are distinct from inspecting rendered views and sending keyboard events through the actual application. Browser results and their limits are in the README and `views/browser-check.json`.
+Ten programmatic test groups check the six-suite schedule, court and living voids, disjoint plates, every opened doorway, flat social route, all four indoor flights and landings in both directions, loggia guards, foyer-to-stair route and connectivity to rooms, bathrooms, dressing room, pantry, balconies and rooftop. They also check both exterior flights, paired entrance leaves, garage approaches and the unobstructed single-surface forecourt. An additional social-layout group checks pulled-out occupied seating, open-appliance clearances, island-to-living sightlines, extended void and gallery guards. These geometry checks are distinct from inspecting rendered views and sending keyboard events through the actual application. Browser results and their limits are in the README and `views/browser-check.json`.
 
 ## Privacy, climate and later professional verification
 
